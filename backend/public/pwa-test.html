@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="PWA Test Page">
+  <meta name="theme-color" content="#4F46E5">
+  <link rel="manifest" href="/manifest.json">
+  <title>PWA Test - KYC App</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #4F46E5;
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+    .status-grid {
+      display: grid;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    .status-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #ddd;
+    }
+    .status-item.success {
+      border-left-color: #10B981;
+      background: #ECFDF5;
+    }
+    .status-item.error {
+      border-left-color: #EF4444;
+      background: #FEF2F2;
+    }
+    .status-item.warning {
+      border-left-color: #F59E0B;
+      background: #FFFBEB;
+    }
+    .status-label {
+      font-weight: 600;
+      color: #333;
+    }
+    .status-value {
+      font-size: 14px;
+      color: #666;
+    }
+    .badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge.success {
+      background: #10B981;
+      color: white;
+    }
+    .badge.error {
+      background: #EF4444;
+      color: white;
+    }
+    .badge.warning {
+      background: #F59E0B;
+      color: white;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    button {
+      flex: 1;
+      min-width: 150px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-primary {
+      background: #4F46E5;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #4338CA;
+      transform: translateY(-2px);
+    }
+    .btn-secondary {
+      background: #E5E7EB;
+      color: #374151;
+    }
+    .btn-secondary:hover {
+      background: #D1D5DB;
+    }
+    .info-box {
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    .info-box h3 {
+      color: #1E40AF;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    .info-box ul {
+      margin-left: 20px;
+      color: #1E3A8A;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 24px;
+      }
+      h1 {
+        font-size: 24px;
+      }
+      button {
+        min-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 PWA Status Check</h1>
+    <p class="subtitle">Testing Progressive Web App functionality</p>
+
+    <div class="status-grid" id="statusGrid">
+      <div class="status-item" id="swStatus">
+        <div>
+          <div class="status-label">Service Worker</div>
+          <div class="status-value">Checking...</div>
+        </div>
+        <span class="badge">⏳</span>
+      </div>
+
+      <div class="status-item" id="manifestStatus">
+        <div>
+          <div class="status-label">Manifest</div>
+          <div class="status-value">Checking...</div>
+        </div>
+        <span class="badge">⏳</span>
+      </div>
+
+      <div class="status-item" id="installStatus">
+        <div>
+          <div class="status-label">Installable</div>
+          <div class="status-value">Checking...</div>
+        </div>
+        <span class="badge">⏳</span>
+      </div>
+
+      <div class="status-item" id="offlineStatus">
+        <div>
+          <div class="status-label">Network Status</div>
+          <div class="status-value">Checking...</div>
+        </div>
+        <span class="badge">⏳</span>
+      </div>
+
+      <div class="status-item" id="cacheStatus">
+        <div>
+          <div class="status-label">Cache Storage</div>
+          <div class="status-value">Checking...</div>
+        </div>
+        <span class="badge">⏳</span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" onclick="location.href='/pages/login.html'">Go to App</button>
+      <button class="btn-secondary" onclick="location.reload()">Refresh Test</button>
+      <button class="btn-secondary" onclick="clearCache()">Clear Cache</button>
+    </div>
+
+    <div class="info-box">
+      <h3>✅ PWA Checklist</h3>
+      <ul>
+        <li>Service Worker should be registered and active</li>
+        <li>Manifest should load without errors</li>
+        <li>App should be installable (look for install button)</li>
+        <li>Cache should contain static assets</li>
+        <li>App should work offline after first visit</li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="/js/pwa-install.js"></script>
+  <script>
+    // Check Service Worker
+    async function checkServiceWorker() {
+      const item = document.getElementById('swStatus');
+      if ('serviceWorker' in navigator) {
+        try {
+          const registration = await navigator.serviceWorker.getRegistration();
+          if (registration) {
+            item.classList.add('success');
+            item.querySelector('.status-value').textContent = 'Active and running';
+            item.querySelector('.badge').textContent = '✓';
+            item.querySelector('.badge').className = 'badge success';
+          } else {
+            item.classList.add('warning');
+            item.querySelector('.status-value').textContent = 'Not registered yet';
+            item.querySelector('.badge').textContent = '⚠';
+            item.querySelector('.badge').className = 'badge warning';
+          }
+        } catch (error) {
+          item.classList.add('error');
+          item.querySelector('.status-value').textContent = 'Error: ' + error.message;
+          item.querySelector('.badge').textContent = '✗';
+          item.querySelector('.badge').className = 'badge error';
+        }
+      } else {
+        item.classList.add('error');
+        item.querySelector('.status-value').textContent = 'Not supported';
+        item.querySelector('.badge').textContent = '✗';
+        item.querySelector('.badge').className = 'badge error';
+      }
+    }
+
+    // Check Manifest
+    async function checkManifest() {
+      const item = document.getElementById('manifestStatus');
+      try {
+        const response = await fetch('/manifest.json');
+        if (response.ok) {
+          const manifest = await response.json();
+          item.classList.add('success');
+          item.querySelector('.status-value').textContent = manifest.name || 'Loaded';
+          item.querySelector('.badge').textContent = '✓';
+          item.querySelector('.badge').className = 'badge success';
+        } else {
+          throw new Error('Failed to load');
+        }
+      } catch (error) {
+        item.classList.add('error');
+        item.querySelector('.status-value').textContent = 'Not found';
+        item.querySelector('.badge').textContent = '✗';
+        item.querySelector('.badge').className = 'badge error';
+      }
+    }
+
+    // Check Installability
+    function checkInstallable() {
+      const item = document.getElementById('installStatus');
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        item.classList.add('success');
+        item.querySelector('.status-value').textContent = 'Already installed';
+        item.querySelector('.badge').textContent = '✓';
+        item.querySelector('.badge').className = 'badge success';
+      } else {
+        item.classList.add('warning');
+        item.querySelector('.status-value').textContent = 'Not installed (look for install button)';
+        item.querySelector('.badge').textContent = '⚠';
+        item.querySelector('.badge').className = 'badge warning';
+      }
+    }
+
+    // Check Network Status
+    function checkNetwork() {
+      const item = document.getElementById('offlineStatus');
+      if (navigator.onLine) {
+        item.classList.add('success');
+        item.querySelector('.status-value').textContent = 'Online';
+        item.querySelector('.badge').textContent = '✓';
+        item.querySelector('.badge').className = 'badge success';
+      } else {
+        item.classList.add('warning');
+        item.querySelector('.status-value').textContent = 'Offline';
+        item.querySelector('.badge').textContent = '⚠';
+        item.querySelector('.badge').className = 'badge warning';
+      }
+    }
+
+    // Check Cache
+    async function checkCache() {
+      const item = document.getElementById('cacheStatus');
+      if ('caches' in window) {
+        try {
+          const cacheNames = await caches.keys();
+          if (cacheNames.length > 0) {
+            const cache = await caches.open(cacheNames[0]);
+            const keys = await cache.keys();
+            item.classList.add('success');
+            item.querySelector('.status-value').textContent = `${keys.length} items cached`;
+            item.querySelector('.badge').textContent = '✓';
+            item.querySelector('.badge').className = 'badge success';
+          } else {
+            item.classList.add('warning');
+            item.querySelector('.status-value').textContent = 'No cache yet';
+            item.querySelector('.badge').textContent = '⚠';
+            item.querySelector('.badge').className = 'badge warning';
+          }
+        } catch (error) {
+          item.classList.add('error');
+          item.querySelector('.status-value').textContent = 'Error checking cache';
+          item.querySelector('.badge').textContent = '✗';
+          item.querySelector('.badge').className = 'badge error';
+        }
+      } else {
+        item.classList.add('error');
+        item.querySelector('.status-value').textContent = 'Not supported';
+        item.querySelector('.badge').textContent = '✗';
+        item.querySelector('.badge').className = 'badge error';
+      }
+    }
+
+    // Clear Cache
+    async function clearCache() {
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+        alert('Cache cleared! Reload the page to rebuild cache.');
+        location.reload();
+      }
+    }
+
+    // Run all checks
+    async function runAllChecks() {
+      await checkServiceWorker();
+      await checkManifest();
+      checkInstallable();
+      checkNetwork();
+      await checkCache();
+    }
+
+    // Run checks on load
+    window.addEventListener('load', runAllChecks);
+
+    // Update network status on change
+    window.addEventListener('online', checkNetwork);
+    window.addEventListener('offline', checkNetwork);
+  </script>
+</body>
+</html>
