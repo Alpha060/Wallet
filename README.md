@@ -1,4 +1,4 @@
-# KYC Management System
+# Wallet Management System
 
 A complete, production-ready KYC (Know Your Customer) Management and Verification System with wallet functionality, built as a Progressive Web App (PWA).
 
