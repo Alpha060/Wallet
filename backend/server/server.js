@@ -93,6 +93,17 @@ async function startServer() {
     // Run database migrations
     await runMigrations();
     
+    // Initialize admin user on first run (production)
+    if (process.env.NODE_ENV === 'production') {
+      try {
+        const { initializeAdmin } = await import('../scripts/initAdmin.js');
+        await initializeAdmin();
+        console.log('Admin initialization check completed');
+      } catch (error) {
+        console.log('Admin initialization skipped or already exists');
+      }
+    }
+    
     // Start server - Listen on all network interfaces
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`);

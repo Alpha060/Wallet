@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import pool from '../server/database/db.js';
 import readline from 'readline';
+import bcrypt from 'bcrypt';
 
 dotenv.config();
 
@@ -16,6 +17,46 @@ const rl = readline.createInterface({
 
 function question(query) {
   return new Promise(resolve => rl.question(query, resolve));
+}
+
+// Export function for programmatic use
+export async function initializeAdmin() {
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123456';
+
+    // Check if admin already exists
+    const checkQuery = 'SELECT id, email, is_admin FROM users WHERE email = $1';
+    const checkResult = await pool.query(checkQuery, [adminEmail]);
+
+    if (checkResult.rows.length > 0) {
+      const user = checkResult.rows[0];
+      if (user.is_admin) {
+        console.log('Admin user already exists');
+        return;
+      }
+      // Make existing user admin
+      await pool.query('UPDATE users SET is_admin = true WHERE id = $1', [user.id]);
+      console.log(`User ${adminEmail} promoted to admin`);
+      return;
+    }
+
+    // Create new admin user
+    const hashedPassword = await bcrypt.hash(adminPassword, 10);
+    const insertQuery = `
+      INSERT INTO users (email, password, name, is_admin, is_active, kyc_status)
+      VALUES ($1, $2, $3, true, true, 'verified')
+      RETURNING id, email
+    `;
+    const result = await pool.query(insertQuery, [adminEmail, hashedPassword, 'Admin']);
+    
+    // Create wallet for admin
+    await pool.query('INSERT INTO wallets (user_id, balance) VALUES ($1, 0)', [result.rows[0].id]);
+    
+    console.log(`Admin user created: ${adminEmail}`);
+  } catch (error) {
+    console.log('Admin initialization error:', error.message);
+  }
 }
 
 async function initAdmin() {
@@ -91,5 +132,7 @@ async function initAdmin() {
   }
 }
 
-// Run the script
-initAdmin();
+// Run the script only if called directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  initAdmin();
+}
