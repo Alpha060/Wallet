@@ -24,8 +24,8 @@ export async function initializeAdmin() {
       // Create new admin
       const hashedPassword = await bcrypt.hash(password, 10);
       const insertResult = await pool.query(
-        'INSERT INTO users (email, password, name, is_admin, is_active, kyc_status) VALUES ($1, $2, $3, true, true, $4) RETURNING id',
-        [email, hashedPassword, 'Admin', 'verified']
+        'INSERT INTO users (email, password_hash, name, is_admin, is_active) VALUES ($1, $2, $3, true, true) RETURNING id',
+        [email, hashedPassword, 'Admin']
       );
       
       // Create wallet for admin
@@ -58,8 +58,8 @@ async function initAdmin() {
       // Create new admin
       const hashedPassword = await bcrypt.hash(password, 10);
       const insertResult = await pool.query(
-        'INSERT INTO users (email, password, name, is_admin, is_active, kyc_status) VALUES ($1, $2, $3, true, true, $4) RETURNING id',
-        [email, hashedPassword, 'Admin', 'verified']
+        'INSERT INTO users (email, password_hash, name, is_admin, is_active) VALUES ($1, $2, $3, true, true) RETURNING id',
+        [email, hashedPassword, 'Admin']
       );
       
       // Create wallet for admin

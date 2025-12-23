@@ -129,6 +129,8 @@ export const generalLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Configure for Railway deployment
+  trustProxy: process.env.NODE_ENV === 'production',
   skip: (req) => {
     // Skip rate limiting in development for localhost
     return process.env.NODE_ENV === 'development' && 
