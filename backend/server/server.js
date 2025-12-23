@@ -19,6 +19,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy for Railway deployment
+app.set('trust proxy', true);
+
 // CORS configuration - Allow all origins in development
 app.use(cors({
   origin: true,
