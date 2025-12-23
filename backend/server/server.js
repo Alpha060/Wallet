@@ -20,7 +20,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Trust proxy for Railway deployment
-app.set('trust proxy', true);
+app.set('trust proxy', 1);
 
 // CORS configuration - Allow all origins in development
 app.use(cors({
