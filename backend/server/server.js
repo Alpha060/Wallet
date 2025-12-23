@@ -102,6 +102,13 @@ app.get('*', (req, res) => {
 // Run migrations and start server
 async function startServer() {
   try {
+    // Wait for database to be ready (Railway startup)
+    if (process.env.NODE_ENV === 'production') {
+      console.log('Waiting for database connection...');
+      const { waitForDatabase } = await import('./database/db.js');
+      await waitForDatabase();
+    }
+    
     // Run database migrations
     await runMigrations();
     
