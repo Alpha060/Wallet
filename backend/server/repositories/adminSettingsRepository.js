@@ -168,19 +168,13 @@ class AdminSettingsRepository {
       
       // Delete related data in order (foreign key constraints)
       
-      // Delete deposits
-      await client.query('DELETE FROM deposits WHERE user_id = $1', [userId]);
+      // Delete deposit requests
+      await client.query('DELETE FROM deposit_requests WHERE user_id = $1', [userId]);
       
-      // Delete withdrawals
-      await client.query('DELETE FROM withdrawals WHERE user_id = $1', [userId]);
+      // Delete withdrawal requests  
+      await client.query('DELETE FROM withdrawal_requests WHERE user_id = $1', [userId]);
       
-      // Delete transactions
-      await client.query('DELETE FROM transactions WHERE user_id = $1', [userId]);
-      
-      // Delete wallet
-      await client.query('DELETE FROM wallets WHERE user_id = $1', [userId]);
-      
-      // Finally delete user
+      // Finally delete user (wallet_balance is stored in users table)
       await client.query('DELETE FROM users WHERE id = $1', [userId]);
       
       await client.query('COMMIT');

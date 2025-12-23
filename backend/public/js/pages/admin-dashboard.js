@@ -937,7 +937,7 @@ async function deleteUser(userId, userName) {
   console.log('deleteUser called with:', { userId, userName });
   
   try {
-    const confirmMessage = `⚠️ WARNING: This will permanently delete "${userName}" and all their data including:\n\n• User account\n• Wallet and balance\n• All deposits and withdrawals\n• Transaction history\n\nThis action CANNOT be undone!\n\nType "DELETE" to confirm:`;
+    const confirmMessage = `⚠️ WARNING: This will permanently delete "${userName}" and all their data including:\n\n• User account\n• Wallet balance\n• All deposit requests\n• All withdrawal requests\n\nThis action CANNOT be undone!\n\nType "DELETE" to confirm:`;
     
     const confirmation = prompt(confirmMessage);
     
@@ -948,6 +948,14 @@ async function deleteUser(userId, userName) {
     }
 
     console.log('Calling API to delete user...');
+    
+    // Show loading state
+    const deleteButtons = document.querySelectorAll(`[data-user-id="${userId}"][data-action="delete"]`);
+    deleteButtons.forEach(btn => {
+      btn.disabled = true;
+      btn.textContent = 'Deleting...';
+    });
+    
     const result = await api.deleteUser(userId);
     console.log('API response:', result);
     
@@ -956,10 +964,24 @@ async function deleteUser(userId, userName) {
     
   } catch (error) {
     console.error('Error deleting user:', error);
-    if (error.message.includes('Cannot delete admin')) {
-      showToast('Cannot delete admin users', 'error');
-    } else if (error.message.includes('not found')) {
-      showToast('User not found', 'error');
+    
+    // Re-enable buttons
+    const deleteButtons = document.querySelectorAll(`[data-user-id="${userId}"][data-action="delete"]`);
+    deleteButtons.forEach(btn => {
+      btn.disabled = false;
+      btn.textContent = 'Delete';
+    });
+    
+    if (error.error && error.error.message) {
+      showToast(error.error.message, 'error');
+    } else if (error.message) {
+      if (error.message.includes('Cannot delete admin')) {
+        showToast('Cannot delete admin users', 'error');
+      } else if (error.message.includes('not found')) {
+        showToast('User not found', 'error');
+      } else {
+        showToast(error.message, 'error');
+      }
     } else {
       showToast('Error deleting user', 'error');
     }
