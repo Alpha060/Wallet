@@ -71,8 +71,22 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve static frontend files
-app.use(express.static(path.join(__dirname, '../public')));
+// Serve static frontend files with proper cache headers
+app.use(express.static(path.join(__dirname, '../public'), {
+  setHeaders: (res, path) => {
+    // Cache static assets for a short time in development, longer in production
+    if (path.endsWith('.html')) {
+      // HTML files - no cache (always check for updates)
+      res.set('Cache-Control', 'no-cache, must-revalidate');
+    } else if (path.endsWith('.js') || path.endsWith('.css')) {
+      // JS/CSS files - short cache with revalidation
+      res.set('Cache-Control', 'public, max-age=300, must-revalidate'); // 5 minutes
+    } else {
+      // Other static files (images, fonts) - longer cache
+      res.set('Cache-Control', 'public, max-age=3600'); // 1 hour
+    }
+  }
+}));
 
 // Serve uploaded files
 const uploadDir = process.env.UPLOAD_DIR || './uploads';

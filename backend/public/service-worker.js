@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kyc-app-v5';
+const CACHE_NAME = 'kyc-app-v6'; // Updated version to force cache refresh
 const urlsToCache = [
   '/',
   '/index.html',
@@ -18,18 +18,23 @@ const urlsToCache = [
   '/css/forgot-password.css',
   '/js/pwa-install.js',
   '/js/config.js',
-  '/js/pages/login.js',
-  '/js/pages/user-dashboard.js',
-  '/js/pages/admin-dashboard.js',
-  '/js/pages/forgot-password.js',
-  '/js/pages/register.js',
   '/favicon.ico'
 ];
 
 // URLs that should NEVER be cached (always fetch from network)
 const noCachePatterns = [
   '/api/',
-  '/uploads/'
+  '/uploads/',
+  '/js/pages/', // Don't cache JS pages - they change frequently
+  '/js/services/', // Don't cache API services
+  '/js/utils/' // Don't cache utilities
+];
+
+// URLs that should use network-first strategy (check network first, fallback to cache)
+const networkFirstPatterns = [
+  '/pages/',
+  '/js/',
+  '/css/'
 ];
 
 // Install event - cache resources
@@ -69,7 +74,12 @@ function shouldBypassCache(url) {
   return noCachePatterns.some(pattern => url.includes(pattern));
 }
 
-// Fetch event - network-first for API, cache-first for static assets
+// Check if URL should use network-first strategy
+function shouldUseNetworkFirst(url) {
+  return networkFirstPatterns.some(pattern => url.includes(pattern));
+}
+
+// Fetch event - smart caching strategy
 self.addEventListener('fetch', (event) => {
   const requestUrl = event.request.url;
   
@@ -88,7 +98,38 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // For static assets - cache-first strategy
+  // For pages, JS, CSS - network-first strategy (always try network first)
+  if (shouldUseNetworkFirst(requestUrl)) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // If network request succeeds, cache it and return
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Network failed, try cache
+          return caches.match(event.request)
+            .then((cachedResponse) => {
+              if (cachedResponse) {
+                console.log('Serving from cache (network failed):', requestUrl);
+                return cachedResponse;
+              }
+              // No cache either, return offline page
+              return caches.match('/index.html');
+            });
+        })
+    );
+    return;
+  }
+  
+  // For other assets - cache-first strategy
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
