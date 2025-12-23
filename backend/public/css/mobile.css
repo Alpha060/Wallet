@@ -1159,7 +1159,7 @@
 
   /* Deposit Submit Button */
   body .btn-deposit-submit {
-    margin: 0 16px 24px;
+    margin: 0 auto 24px;
     padding: 18px;
     font-size: 16px;
     font-weight: 700;
@@ -1168,6 +1168,8 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
+    width: calc(100% - 32px);
+    max-width: 400px;
   }
 
   body .btn-icon {
@@ -1455,7 +1457,9 @@ body .deposit-balance-card .balance-amount {
 }
 
 .submit-section {
-  padding: 0 24px 24px;
+  padding: 0 16px 24px;
+  display: flex;
+  justify-content: center;
 }
 
 .btn-deposit-submit {
@@ -3691,7 +3695,9 @@ body .withdraw-balance-card .max-hint {
 
   /* Submit Section */
   body .submit-section {
-    padding: 0;
+    padding: 0 16px;
+    display: flex;
+    justify-content: center;
   }
 
   body .btn-deposit-submit {
