@@ -1,22 +1,33 @@
--- Migration 001: Initial Schema
--- Created: 2024-12-14
--- Description: Creates initial database schema for Manual Wallet Manager
+-- Complete Database Schema for Manual Wallet Manager
+-- Consolidated from all migrations
+-- Created: 2024-12-23
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Users table
+-- Users table (with all fields including KYC)
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
+    name VARCHAR(255),
     is_admin BOOLEAN DEFAULT FALSE,
+    is_active BOOLEAN DEFAULT TRUE,
     wallet_balance INTEGER DEFAULT 0,
+    mobile_number VARCHAR(15),
+    aadhar_number VARCHAR(12),
+    date_of_birth DATE,
+    pan_number VARCHAR(10),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- User indexes
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_is_active ON users(is_active);
+CREATE INDEX IF NOT EXISTS idx_users_mobile_number ON users(mobile_number);
+CREATE INDEX IF NOT EXISTS idx_users_aadhar_number ON users(aadhar_number);
+CREATE INDEX IF NOT EXISTS idx_users_pan_number ON users(pan_number);
 
 -- Deposit requests table
 CREATE TABLE IF NOT EXISTS deposit_requests (
@@ -83,3 +94,9 @@ CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
 DROP TRIGGER IF EXISTS update_admin_settings_updated_at ON admin_settings;
 CREATE TRIGGER update_admin_settings_updated_at BEFORE UPDATE ON admin_settings
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Column comments
+COMMENT ON COLUMN users.mobile_number IS 'User mobile/phone number';
+COMMENT ON COLUMN users.aadhar_number IS 'Aadhar card number (12 digits, users only)';
+COMMENT ON COLUMN users.date_of_birth IS 'User date of birth (users only)';
+COMMENT ON COLUMN users.pan_number IS 'PAN card number (10 characters, users only)';

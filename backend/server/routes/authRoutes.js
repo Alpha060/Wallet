@@ -327,8 +327,16 @@ router.put('/profile', authenticate, async (req, res) => {
     // Update profile
     const updatedUser = await userRepository.updateProfile(userId, updates);
 
+    // Determine appropriate message based on what was updated
+    let message = 'Profile updated successfully';
+    if (updates.passwordHash && Object.keys(updates).length === 1) {
+      message = 'Password updated successfully';
+    } else if (updates.passwordHash) {
+      message = 'Profile and password updated successfully';
+    }
+
     res.status(200).json({
-      message: 'Profile updated successfully',
+      message: message,
       user: {
         id: updatedUser.id,
         email: updatedUser.email,

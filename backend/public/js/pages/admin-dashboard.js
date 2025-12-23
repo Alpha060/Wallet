@@ -31,8 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setupModals();
   setupRefreshButtons();
   setupMobileMenu();
-  setupBottomNav();
-  updateMobilePageTitle();
 });
 
 // Setup theme toggle

@@ -8,6 +8,25 @@ if (AuthUtils.isAuthenticated()) {
   window.location.href = user.isAdmin ? '/admin-dashboard' : '/user-dashboard';
 }
 
+// Password toggle functionality
+document.querySelectorAll('.toggle-password').forEach(button => {
+  button.addEventListener('click', () => {
+    const input = button.parentElement.querySelector('input');
+    const eyeIcon = button.querySelector('.eye-icon');
+    const eyeOffIcon = button.querySelector('.eye-off-icon');
+    
+    if (input.type === 'password') {
+      input.type = 'text';
+      eyeIcon.classList.add('hidden');
+      eyeOffIcon.classList.remove('hidden');
+    } else {
+      input.type = 'password';
+      eyeIcon.classList.remove('hidden');
+      eyeOffIcon.classList.add('hidden');
+    }
+  });
+});
+
 // Handle login form submission
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();

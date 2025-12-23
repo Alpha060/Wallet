@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kyc-app-v1';
+const CACHE_NAME = 'kyc-app-v5';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -24,6 +24,12 @@ const urlsToCache = [
   '/js/pages/forgot-password.js',
   '/js/pages/register.js',
   '/favicon.ico'
+];
+
+// URLs that should NEVER be cached (always fetch from network)
+const noCachePatterns = [
+  '/api/',
+  '/uploads/'
 ];
 
 // Install event - cache resources
@@ -58,8 +64,31 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch event - serve from cache, fallback to network
+// Check if URL should bypass cache (API calls, uploads, etc.)
+function shouldBypassCache(url) {
+  return noCachePatterns.some(pattern => url.includes(pattern));
+}
+
+// Fetch event - network-first for API, cache-first for static assets
 self.addEventListener('fetch', (event) => {
+  const requestUrl = event.request.url;
+  
+  // For API calls and uploads - ALWAYS go to network, never cache
+  if (shouldBypassCache(requestUrl)) {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => {
+          // Return error response for failed API calls
+          return new Response(JSON.stringify({ error: 'Network unavailable' }), {
+            status: 503,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        })
+    );
+    return;
+  }
+  
+  // For static assets - cache-first strategy
   event.respondWith(
     caches.match(event.request)
       .then((response) => {

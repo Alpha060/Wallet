@@ -84,17 +84,22 @@ async function loadUserData() {
     
     // Update sidebar profile
     const displayName = user.name || user.email.split('@')[0];
+    const firstName = displayName.split(' ')[0];
     const initials = displayName.charAt(0).toUpperCase();
     
     const sidebarUserAvatar = document.getElementById('sidebarUserAvatar');
     const sidebarUserName = document.getElementById('sidebarUserName');
     const sidebarUserEmail = document.getElementById('sidebarUserEmail');
     const mobileUserAvatar = document.getElementById('mobileUserAvatar');
+    const mobilePageTitle = document.getElementById('mobilePageTitle');
     
     if (sidebarUserAvatar) sidebarUserAvatar.textContent = initials;
     if (sidebarUserName) sidebarUserName.textContent = displayName;
     if (sidebarUserEmail) sidebarUserEmail.textContent = user.email;
     if (mobileUserAvatar) mobileUserAvatar.textContent = initials;
+    if (mobilePageTitle && currentView === 'overview') {
+      mobilePageTitle.textContent = firstName;
+    }
     
     // Check profile completion
     checkProfileCompletion(user);
@@ -752,22 +757,7 @@ function setupMobileMenu() {
   const sidebarOverlay = document.getElementById('sidebarOverlay');
   const mobileOverlay = document.getElementById('mobileOverlay');
 
-  // Update mobile user info
-  const user = AuthUtils.getUser();
-  const displayName = user.name || user.email.split('@')[0];
-  const firstName = displayName.split(' ')[0];
-  const initials = displayName.charAt(0).toUpperCase();
-  
-  const mobilePageTitle = document.getElementById('mobilePageTitle');
-  const sidebarUserAvatar = document.getElementById('sidebarUserAvatar');
-  const sidebarUserName = document.getElementById('sidebarUserName');
-  const sidebarUserEmail = document.getElementById('sidebarUserEmail');
-  
-  if (mobileUserAvatar) mobileUserAvatar.textContent = initials;
-  if (mobilePageTitle) mobilePageTitle.textContent = firstName;
-  if (sidebarUserAvatar) sidebarUserAvatar.textContent = initials;
-  if (sidebarUserName) sidebarUserName.textContent = displayName;
-  if (sidebarUserEmail) sidebarUserEmail.textContent = user.email;
+  // Note: User info is loaded by loadUserData() function, no need to duplicate here
 
   // Profile avatar click handler (opens sidebar)
   if (mobileUserAvatar) {
@@ -892,7 +882,26 @@ function setupSettings() {
 
     try {
       await api.updateProfile(name, null, null, mobileNumber, aadharNumber, dateOfBirth, panNumber);
-      await loadUserData(); // Reload to update banner
+      
+      // Reload user data to update UI and banner
+      const user = await api.getCurrentUser();
+      
+      // Update sidebar profile
+      const displayName = user.name || user.email.split('@')[0];
+      const initials = displayName.charAt(0).toUpperCase();
+      
+      const sidebarUserAvatar = document.getElementById('sidebarUserAvatar');
+      const sidebarUserName = document.getElementById('sidebarUserName');
+      const sidebarUserEmail = document.getElementById('sidebarUserEmail');
+      const mobileUserAvatar = document.getElementById('mobileUserAvatar');
+      
+      if (sidebarUserAvatar) sidebarUserAvatar.textContent = initials;
+      if (sidebarUserName) sidebarUserName.textContent = displayName;
+      if (sidebarUserEmail) sidebarUserEmail.textContent = user.email;
+      if (mobileUserAvatar) mobileUserAvatar.textContent = initials;
+      
+      // Update profile completion banner
+      checkProfileCompletion(user);
     } catch (error) {
       console.error('Error updating profile:', error);
     } finally {
@@ -934,10 +943,23 @@ function setupSettings() {
 }
 
 // Load settings
-function loadSettings() {
-  const user = AuthUtils.getUser();
-  document.getElementById('profileName').value = user.name || '';
-  document.getElementById('profileEmail').value = user.email;
+async function loadSettings() {
+  try {
+    // Fetch fresh user data from API
+    const user = await api.getCurrentUser();
+    
+    // Update all profile fields
+    if (document.getElementById('profileName')) {
+      document.getElementById('profileName').value = user.name || '';
+      document.getElementById('profileEmail').value = user.email;
+      document.getElementById('profileMobile').value = user.mobileNumber || '';
+      document.getElementById('profileDOB').value = formatDateForInput(user.dateOfBirth);
+      document.getElementById('profileAadhar').value = user.aadharNumber || '';
+      document.getElementById('profilePAN').value = user.panNumber || '';
+    }
+  } catch (error) {
+    console.error('Error loading settings:', error);
+  }
 }
 
 // Setup history view

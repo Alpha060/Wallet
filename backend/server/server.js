@@ -32,6 +32,15 @@ app.use(express.urlencoded({ extended: true }));
 // Apply general rate limiting to all API routes
 app.use('/api/', generalLimiter);
 
+// Disable caching for all API routes
+app.use('/api/', (req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  res.set('Surrogate-Control', 'no-store');
+  next();
+});
+
 // URL rewriting middleware - Remove .html extension
 app.use((req, res, next) => {
   // Skip if it's an API route, static file, or already has an extension
