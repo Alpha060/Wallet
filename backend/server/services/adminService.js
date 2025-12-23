@@ -105,6 +105,62 @@ class AdminService {
       adminName: adminName
     };
   }
+
+  /**
+   * Update admin profile (email, name)
+   * @param {string} adminId - Admin user ID
+   * @param {Object} profileData - Profile data to update
+   * @returns {Promise<Object>} Updated admin user
+   * @throws {Error} If update fails or email already exists
+   */
+  async updateAdminProfile(adminId, profileData) {
+    const { email, name } = profileData;
+    
+    // Check if email already exists (for different user)
+    if (email) {
+      const existingUser = await adminSettingsRepository.findUserByEmail(email);
+      if (existingUser && existingUser.id !== adminId) {
+        throw new Error('Email already exists');
+      }
+    }
+
+    // Update admin profile
+    const updatedAdmin = await adminSettingsRepository.updateAdminProfile(adminId, {
+      email,
+      name
+    });
+
+    if (!updatedAdmin) {
+      throw new Error('Admin not found');
+    }
+
+    return updatedAdmin;
+  }
+
+  /**
+   * Delete a user
+   * @param {string} userId - User ID to delete
+   * @returns {Promise<Object>} Deleted user data
+   * @throws {Error} If user not found or is admin
+   */
+  async deleteUser(userId) {
+    // Get user details first
+    const user = await adminSettingsRepository.findUserById(userId);
+    
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Prevent deletion of admin users
+    if (user.is_admin) {
+      throw new Error('Cannot delete admin users');
+    }
+
+    // Delete user and related data
+    const deletedUser = await adminSettingsRepository.deleteUser(userId);
+    
+    return deletedUser;
+  }
 }
 
 export default new AdminService();

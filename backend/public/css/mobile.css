@@ -2492,7 +2492,8 @@ body .withdraw-balance-card .max-hint {
   }
 
   .btn-activate,
-  .btn-deactivate {
+  .btn-deactivate,
+  .btn-delete {
     flex: 1 !important;
     padding: 8px 12px !important;
     border-radius: 8px !important;
@@ -2510,6 +2511,11 @@ body .withdraw-balance-card .max-hint {
   .btn-deactivate {
     background: rgba(239, 68, 68, 0.15) !important;
     color: #ef4444 !important;
+  }
+
+  .btn-delete {
+    background: rgba(107, 114, 128, 0.15) !important;
+    color: #6b7280 !important;
   }
 
   /* Admin Settings */

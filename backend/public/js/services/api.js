@@ -586,6 +586,61 @@ class ApiService {
       throw error;
     }
   }
+
+  // Update admin profile
+  async updateAdminProfile(profileData) {
+    try {
+      const response = await fetch('/api/admin/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${AuthUtils.getToken()}`
+        },
+        body: JSON.stringify(profileData)
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw data;
+      }
+
+      // Update stored user data
+      const currentUser = AuthUtils.getUser();
+      if (currentUser) {
+        const updatedUser = { ...currentUser, ...data.admin };
+        AuthUtils.updateUser(updatedUser);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Update admin profile error:', error);
+      throw error;
+    }
+  }
+
+  // Delete user
+  async deleteUser(userId) {
+    try {
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${AuthUtils.getToken()}`
+        }
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw data;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Delete user error:', error);
+      throw error;
+    }
+  }
 }
 
 export default new ApiService();

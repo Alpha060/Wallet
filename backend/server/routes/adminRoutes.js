@@ -868,4 +868,146 @@ router.patch('/users/:id/status', authenticate, requireAdmin, async (req, res) =
   }
 });
 
+/**
+ * PUT /api/admin/profile
+ * Update admin profile (email, name)
+ */
+router.put('/profile', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { email, name } = req.body;
+    const adminId = req.user.id;
+
+    // Validation
+    if (!email || !email.trim()) {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Email is required',
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid email format',
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+
+    // Update admin profile
+    const updatedAdmin = await adminService.updateAdminProfile(adminId, { email: email.trim(), name: name?.trim() });
+
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      admin: {
+        id: updatedAdmin.id,
+        email: updatedAdmin.email,
+        name: updatedAdmin.name,
+        is_admin: updatedAdmin.is_admin
+      }
+    });
+  } catch (error) {
+    console.error('Update admin profile error:', error);
+    
+    if (error.message.includes('already exists')) {
+      return res.status(409).json({
+        error: {
+          code: 'EMAIL_EXISTS',
+          message: 'Email address is already in use',
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An error occurred while updating profile',
+        timestamp: new Date().toISOString()
+      }
+    });
+  }
+});
+
+/**
+ * DELETE /api/admin/users/:id
+ * Delete a user (admin only)
+ */
+router.delete('/users/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const adminId = req.user.id;
+
+    // Validation
+    if (!userId) {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'User ID is required',
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+
+    // Prevent admin from deleting themselves
+    if (userId === adminId) {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Cannot delete your own account',
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+
+    // Delete user
+    const deletedUser = await adminService.deleteUser(userId);
+
+    res.status(200).json({
+      message: 'User deleted successfully',
+      deletedUser: {
+        id: deletedUser.id,
+        email: deletedUser.email,
+        name: deletedUser.name
+      }
+    });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    
+    if (error.message.includes('not found')) {
+      return res.status(404).json({
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'User not found',
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+
+    if (error.message.includes('Cannot delete admin')) {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Cannot delete admin users',
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An error occurred while deleting user',
+        timestamp: new Date().toISOString()
+      }
+    });
+  }
+});
+
 export default router;

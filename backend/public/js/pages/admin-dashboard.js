@@ -365,7 +365,20 @@ function setupSettings() {
       
       const submitBtn = e.target.querySelector('button[type="submit"]');
       const name = document.getElementById('adminName').value.trim();
+      const email = document.getElementById('adminEmail').value.trim();
       const mobileNumber = document.getElementById('adminMobile').value.trim();
+      
+      // Validate email
+      if (!email) {
+        showToast('Email is required', 'error');
+        return;
+      }
+      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showToast('Please enter a valid email address', 'error');
+        return;
+      }
       
       // Validate mobile if provided
       if (mobileNumber && !validateMobile(mobileNumber)) {
@@ -376,10 +389,17 @@ function setupSettings() {
       showLoading(submitBtn);
 
       try {
-        await api.updateProfile(name, null, null, mobileNumber);
+        // Update admin profile with new email
+        await api.updateAdminProfile({ name, email });
+        showToast('Profile updated successfully', 'success');
         await loadUserData();
       } catch (error) {
-        console.error('Error updating personal info:', error);
+        console.error('Error updating admin profile:', error);
+        if (error.message.includes('already exists')) {
+          showToast('Email address is already in use', 'error');
+        } else {
+          showToast('Error updating profile', 'error');
+        }
       } finally {
         hideLoading(submitBtn);
       }
@@ -752,6 +772,10 @@ async function loadUsers() {
               `<button class="btn-deactivate" data-user-id="${escapeHtml(user.id)}" data-action="deactivate">Deactivate</button>` :
               `<button class="btn-activate" data-user-id="${escapeHtml(user.id)}" data-action="activate">Activate</button>`
             }
+            ${!user.isAdmin ? 
+              `<button class="btn-delete" data-user-id="${escapeHtml(user.id)}" data-user-name="${escapeHtml(user.name || user.email)}" data-action="delete">Delete</button>` :
+              ''
+            }
           </div>
         </td>
       </tr>
@@ -866,6 +890,20 @@ function handleUserTableClick(e) {
     toggleUserStatus(userId, activate);
     return;
   }
+
+  // Handle delete button clicks
+  if (e.target.classList.contains('btn-delete')) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const userId = e.target.dataset.userId;
+    const userName = e.target.dataset.userName;
+    
+    console.log('Delete user button clicked:', { userId, userName });
+    
+    deleteUser(userId, userName);
+    return;
+  }
 }
 
 // Toggle user status
@@ -891,6 +929,40 @@ async function toggleUserStatus(userId, activate) {
   } catch (error) {
     console.error(`Error ${activate ? 'activating' : 'deactivating'} user:`, error);
     showToast(`Error ${activate ? 'activating' : 'deactivating'} user`, 'error');
+  }
+}
+
+// Delete user
+async function deleteUser(userId, userName) {
+  console.log('deleteUser called with:', { userId, userName });
+  
+  try {
+    const confirmMessage = `⚠️ WARNING: This will permanently delete "${userName}" and all their data including:\n\n• User account\n• Wallet and balance\n• All deposits and withdrawals\n• Transaction history\n\nThis action CANNOT be undone!\n\nType "DELETE" to confirm:`;
+    
+    const confirmation = prompt(confirmMessage);
+    
+    if (confirmation !== 'DELETE') {
+      console.log('User cancelled deletion or incorrect confirmation');
+      showToast('Deletion cancelled', 'info');
+      return;
+    }
+
+    console.log('Calling API to delete user...');
+    const result = await api.deleteUser(userId);
+    console.log('API response:', result);
+    
+    showToast(`User "${userName}" deleted successfully`, 'success');
+    loadUsers(); // Reload users list
+    
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    if (error.message.includes('Cannot delete admin')) {
+      showToast('Cannot delete admin users', 'error');
+    } else if (error.message.includes('not found')) {
+      showToast('User not found', 'error');
+    } else {
+      showToast('Error deleting user', 'error');
+    }
   }
 }
 

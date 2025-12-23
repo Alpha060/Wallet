@@ -865,6 +865,22 @@
   background: #c82333;
 }
 
+.btn-delete {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-left: 0.25rem;
+}
+
+.btn-delete:hover {
+  background: #5a6268;
+}
+
 .btn-activate {
   background: #28a745;
   color: white;
