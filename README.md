@@ -2,6 +2,8 @@
 
 A complete wallet management system with deposit/withdrawal functionality, built as a Progressive Web App (PWA).
 
+<!-- Force Railway Deploy: v1.1 -->
+
 ## Features
 
 ### Authentication & Security
