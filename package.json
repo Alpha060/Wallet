@@ -1,0 +1,19 @@
+{
+  "name": "kyc-management-system",
+  "version": "1.0.0",
+  "description": "Complete KYC Management and Verification System with PWA",
+  "main": "backend/server/server.js",
+  "scripts": {
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev",
+    "install": "cd backend && npm install",
+    "build": "cd backend && npm install"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": ["kyc", "wallet", "pwa", "nodejs", "express", "postgresql"],
+  "author": "",
+  "license": "ISC"
+}
