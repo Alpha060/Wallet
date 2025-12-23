@@ -6,8 +6,8 @@ import rateLimit from 'express-rate-limit';
  * 5 requests per 15 minutes per IP
  */
 export const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs
+  windowMs: 1 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 5 requests per windowMs
   message: {
     error: {
       code: 'RATE_LIMIT_EXCEEDED',
