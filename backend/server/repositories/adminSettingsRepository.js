@@ -166,12 +166,16 @@ class AdminSettingsRepository {
         throw new Error('User not found');
       }
       
-      // Delete related data in order (foreign key constraints)
+      // Handle foreign key constraints properly
       
-      // Delete deposit requests
+      // First, set processed_by to NULL for any requests processed by this user
+      await client.query('UPDATE deposit_requests SET processed_by = NULL WHERE processed_by = $1', [userId]);
+      await client.query('UPDATE withdrawal_requests SET processed_by = NULL WHERE processed_by = $1', [userId]);
+      
+      // Delete deposit requests created by this user
       await client.query('DELETE FROM deposit_requests WHERE user_id = $1', [userId]);
       
-      // Delete withdrawal requests  
+      // Delete withdrawal requests created by this user
       await client.query('DELETE FROM withdrawal_requests WHERE user_id = $1', [userId]);
       
       // Finally delete user (wallet_balance is stored in users table)
