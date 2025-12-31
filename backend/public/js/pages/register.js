@@ -8,6 +8,15 @@ if (AuthUtils.isAuthenticated()) {
   window.location.href = user.isAdmin ? '/admin-dashboard' : '/user-dashboard';
 }
 
+// Check for referral code in URL
+const urlParams = new URLSearchParams(window.location.search);
+const refCode = urlParams.get('ref');
+if (refCode) {
+  document.getElementById('referralCode').value = refCode.toUpperCase();
+  // Verify the referral code
+  verifyReferralCode(refCode);
+}
+
 // Password toggle functionality
 document.querySelectorAll('.toggle-password').forEach(button => {
   button.addEventListener('click', () => {
@@ -27,6 +36,64 @@ document.querySelectorAll('.toggle-password').forEach(button => {
   });
 });
 
+// Referral code verification
+const referralInput = document.getElementById('referralCode');
+const referralHint = document.getElementById('referralHint');
+let referralVerificationTimeout;
+
+referralInput.addEventListener('input', (e) => {
+  const code = e.target.value.toUpperCase();
+  e.target.value = code;
+  
+  // Clear previous timeout
+  clearTimeout(referralVerificationTimeout);
+  
+  // Reset hint
+  referralHint.textContent = '';
+  referralHint.style.color = '';
+  
+  if (code.length === 0) {
+    return;
+  }
+  
+  if (code.length < 6) {
+    referralHint.textContent = 'Referral code must be 6 characters';
+    referralHint.style.color = 'var(--color-text-secondary)';
+    return;
+  }
+  
+  // Verify after user stops typing
+  referralVerificationTimeout = setTimeout(() => {
+    verifyReferralCode(code);
+  }, 500);
+});
+
+async function verifyReferralCode(code) {
+  if (!code || code.length !== 6) return;
+  
+  try {
+    const response = await fetch('/api/referrals/verify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ referralCode: code })
+    });
+    
+    const data = await response.json();
+    
+    if (data.valid) {
+      referralHint.textContent = `✓ Valid code from ${data.referrerName}`;
+      referralHint.style.color = 'var(--color-success)';
+    } else {
+      referralHint.textContent = '✗ Invalid referral code';
+      referralHint.style.color = 'var(--color-error)';
+    }
+  } catch (error) {
+    console.error('Error verifying referral code:', error);
+  }
+}
+
 // Handle register form submission
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -36,6 +103,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   const confirmPassword = document.getElementById('confirmPassword').value;
+  const referralCode = document.getElementById('referralCode').value.trim();
 
   // Validate email
   if (!validateEmail(email)) {
@@ -58,7 +126,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
   showLoading(submitBtn);
 
   try {
-    const data = await api.register(email, password, name || null);
+    const data = await api.register(email, password, name || null, referralCode || null);
     
     // Redirect to user dashboard (registration is for users only)
     window.location.href = '/user-dashboard';

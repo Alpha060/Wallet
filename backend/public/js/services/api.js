@@ -49,12 +49,16 @@ class ApiService {
     }
   }
 
-  async register(email, password, name = null) {
+  async register(email, password, name = null, referralCode = null) {
     try {
+      const body = { email, password };
+      if (name) body.name = name;
+      if (referralCode) body.referralCode = referralCode;
+
       const response = await fetch(API_ENDPOINTS.REGISTER, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name })
+        body: JSON.stringify(body)
       });
 
       const data = await response.json();
@@ -648,6 +652,61 @@ class ApiService {
     } catch (error) {
       console.error('Delete user error:', error);
       throw error;
+    }
+  }
+
+  // Referral APIs
+  async getMyReferralCode() {
+    try {
+      const response = await fetch('/api/referrals/my-code', {
+        headers: AuthUtils.getAuthHeaders()
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw data;
+      }
+
+      return data;
+    } catch (error) {
+      throw this.handleError(error, 'Failed to fetch referral code');
+    }
+  }
+
+  async getMyReferrals() {
+    try {
+      const response = await fetch('/api/referrals/my-referrals', {
+        headers: AuthUtils.getAuthHeaders()
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw data;
+      }
+
+      return data;
+    } catch (error) {
+      throw this.handleError(error, 'Failed to fetch referrals');
+    }
+  }
+
+  async getReferralStats() {
+    try {
+      const response = await fetch('/api/referrals/stats', {
+        headers: AuthUtils.getAuthHeaders()
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw data;
+      }
+
+      return data;
+    } catch (error) {
+      throw this.handleError(error, 'Failed to fetch referral stats');
     }
   }
 }

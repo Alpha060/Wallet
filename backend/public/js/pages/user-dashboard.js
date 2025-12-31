@@ -2,6 +2,7 @@ import api from '../services/api.js';
 import { AuthUtils } from '../utils/auth.js';
 import { escapeHtml, formatAmount, parseAmount, formatDate, getStatusClass, showToast, showLoading, hideLoading, validateUPI, validateIFSC, validateMobile, validateAadhar, validatePAN, formatDateForInput } from '../utils/helpers.js';
 import { ThemeManager } from '../utils/theme.js';
+import referralsModule from '../modules/referrals.js';
 
 // Check authentication
 if (!AuthUtils.isAuthenticated()) {
@@ -325,6 +326,7 @@ function switchView(view) {
     overview: 'Overview',
     deposit: 'Make a Deposit',
     withdraw: 'Request Withdrawal',
+    referrals: 'Referrals',
     history: 'Transaction History',
     settings: 'Settings'
   };
@@ -355,6 +357,8 @@ function switchView(view) {
     });
   } else if (view === 'history') {
     loadHistory();
+  } else if (view === 'referrals') {
+    referralsModule.init();
   } else if (view === 'settings') {
     loadSettings();
   }

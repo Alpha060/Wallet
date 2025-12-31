@@ -4,7 +4,7 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Users table (with all fields including KYC)
+-- Users table (with all fields including KYC and referral)
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -17,6 +17,8 @@ CREATE TABLE users (
     aadhar_number VARCHAR(12),
     date_of_birth DATE,
     pan_number VARCHAR(10),
+    referral_code VARCHAR(6) UNIQUE,
+    referred_by UUID REFERENCES users(id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

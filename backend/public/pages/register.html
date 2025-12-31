@@ -94,7 +94,20 @@
               </svg>
             </button>
           </div>
-        </d
+        </div>
+
+        <div class="form-group">
+          <label for="referralCode">Referral Code (Optional)</label>
+          <input 
+            type="text" 
+            id="referralCode" 
+            name="referralCode" 
+            placeholder="Enter 6-digit referral code"
+            maxlength="6"
+            style="text-transform: uppercase;"
+          >
+          <small class="form-hint" id="referralHint"></small>
+        </div>
 
         <button type="submit" class="btn btn-primary btn-block">Register</button>
       </form>

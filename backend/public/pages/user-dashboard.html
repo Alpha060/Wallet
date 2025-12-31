@@ -30,6 +30,7 @@
   <link rel="stylesheet" href="../css/layout.css">
   <link rel="stylesheet" href="../css/animations.css">
   <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/referrals.css">
   <link rel="stylesheet" href="../css/mobile.css">
 </head>
 <body>
@@ -90,6 +91,10 @@
         <a href="#" class="nav-item" data-view="settings">
           <span class="icon">⚙️</span>
           <span>Settings</span>
+        </a>
+        <a href="#" class="nav-item" data-view="referrals">
+          <span class="icon">👥</span>
+          <span>Referrals</span>
         </a>
       </nav>
 
@@ -475,6 +480,67 @@
           </div>
         </div>
 
+        <!-- Referrals View -->
+        <div id="referralsView" class="view-content">
+          <div class="referrals-container">
+            <!-- Referral Code Card -->
+            <div class="referral-code-card">
+              <div class="card-header">
+                <h3 class="card-title">🎁 Your Referral Code</h3>
+              </div>
+              <div class="card-content">
+                <div class="referral-code-display">
+                  <div class="code-box">
+                    <span id="referralCodeText" class="referral-code">------</span>
+                  </div>
+                  <div class="referral-actions">
+                    <button id="copyReferralCodeBtn" class="btn btn-primary">
+                      <span class="btn-icon">📋</span>
+                      Copy Code
+                    </button>
+                    <button id="shareReferralLinkBtn" class="btn btn-secondary">
+                      <span class="btn-icon">🔗</span>
+                      Share Link
+                    </button>
+                  </div>
+                </div>
+                <div class="referral-info">
+                  <p>Share your referral code with friends and earn rewards when they sign up!</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Referral Stats Card -->
+            <div class="referral-stats-card">
+              <div class="card-header">
+                <h3 class="card-title">📊 Referral Statistics</h3>
+              </div>
+              <div class="card-content">
+                <div class="stats-grid">
+                  <div class="stat-item">
+                    <div class="stat-details">
+                      <p class="stat-label">Total Referrals</p>
+                      <p class="stat-value" id="totalReferralsCount">0</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Referrals List Card -->
+            <div class="referrals-list-card">
+              <div class="card-header">
+                <h3 class="card-title">👥 Your Referrals</h3>
+              </div>
+              <div class="card-content">
+                <div id="referralsList" class="referrals-list">
+                  <p class="loading-text">Loading referrals...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Settings View -->
         <div id="settingsView" class="view-content">
           <div class="settings-container">
@@ -729,7 +795,7 @@
           <span>Withdraw</span>
         </a>
         <a href="#" class="bottom-nav-item" data-view="history">
-          <span class="icon">📜</span>
+          <span class="icon">�</spaan>
           <span>History</span>
         </a>
         <a href="#" class="bottom-nav-item" data-view="settings">

@@ -29,10 +29,11 @@ class AuthService {
    * @param {string} email - User email
    * @param {string} password - Plain text password
    * @param {string} name - User name (optional)
+   * @param {string} referralCode - Referral code (optional)
    * @returns {Promise<Object>} Object containing user and token
    * @throws {Error} If email is invalid or already exists
    */
-  async register(email, password, name = null) {
+  async register(email, password, name = null, referralCode = null) {
     // Validate email format
     if (!this.validateEmail(email)) {
       throw new Error('Invalid email format');
@@ -44,11 +45,26 @@ class AuthService {
       throw new Error('Email already registered');
     }
 
+    // Verify referral code if provided
+    if (referralCode) {
+      const referralService = (await import('./referralService.js')).default;
+      const referrer = await referralService.verifyReferralCode(referralCode);
+      if (!referrer) {
+        throw new Error('Invalid referral code');
+      }
+    }
+
     // Hash password
     const passwordHash = await passwordHasher.hash(password);
 
     // Create user
     const user = await userRepository.create(email, passwordHash, false, name);
+
+    // Process referral if code was provided
+    if (referralCode) {
+      const referralService = (await import('./referralService.js')).default;
+      await referralService.processReferral(user.id, referralCode);
+    }
 
     // Generate JWT token
     const token = this.generateToken(user.id, user.email, user.isAdmin);

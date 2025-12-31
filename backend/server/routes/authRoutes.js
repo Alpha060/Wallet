@@ -19,7 +19,7 @@ router.get('/csrf-token', getCsrfToken);
  */
 router.post('/register', registerLimiter, async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, referralCode } = req.body;
 
     // Validate input
     if (!email || !password) {
@@ -43,8 +43,8 @@ router.post('/register', registerLimiter, async (req, res) => {
       });
     }
 
-    // Register user
-    const result = await authService.register(email, password, name || null);
+    // Register user with optional referral code
+    const result = await authService.register(email, password, name || null, referralCode || null);
 
     res.status(201).json({
       user: {
@@ -70,6 +70,16 @@ router.post('/register', registerLimiter, async (req, res) => {
       return res.status(422).json({
         error: {
           code: 'DUPLICATE_EMAIL',
+          message: error.message,
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+
+    if (error.message === 'Invalid referral code') {
+      return res.status(400).json({
+        error: {
+          code: 'INVALID_REFERRAL_CODE',
           message: error.message,
           timestamp: new Date().toISOString()
         }
