@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Complete KYC Management and Verification System">
+  <meta name="theme-color" content="#4F46E5">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="KYC App">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  
+  <!-- Apple Touch Icons -->
+  <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png">
+  
+  <title>Admin Dashboard - KYC Management System</title>
+  <script src="../js/cache-buster.js"></script>
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/typography.css">
+  <link rel="stylesheet" href="../css/utilities.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/mobile.css">
+</head>
+<body>
+  <!-- Mobile Overlay -->
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+
+  <div class="dashboard-container">
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+      <div class="mobile-header-left">
+        <div class="mobile-user-avatar clickable" id="mobileAdminAvatar">A</div>
+        <div class="mobile-header-info">
+          <p class="welcome-text">Admin Panel</p>
+          <h1 class="mobile-header-title" id="mobilePageTitle">Overview</h1>
+        </div>
+      </div>
+      <div class="mobile-header-right">
+        <button class="theme-toggle" id="mobileAdminThemeToggle" title="Toggle theme">
+          <span id="mobileAdminThemeIcon">🌙</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <!-- Profile Section -->
+      <div class="sidebar-profile">
+        <div class="sidebar-profile-info">
+          <div class="sidebar-profile-avatar" id="adminSidebarUserAvatar">A</div>
+          <div class="sidebar-profile-details">
+            <h3 id="adminSidebarUserName">Admin</h3>
+            <p id="adminSidebarUserEmail">admin@example.com</p>
+            <span class="sidebar-profile-badge">Admin Account</span>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-view="overview">
+          <span class="icon">📊</span>
+          <span>Overview</span>
+        </a>
+        <a href="#" class="nav-item" data-view="deposits">
+          <span class="icon">💰</span>
+          <span>Pending Deposits</span>
+          <span class="badge" id="depositsBadge">0</span>
+        </a>
+        <a href="#" class="nav-item" data-view="withdrawals">
+          <span class="icon">💸</span>
+          <span>Pending Withdrawals</span>
+          <span class="badge" id="withdrawalsBadge">0</span>
+        </a>
+        <a href="#" class="nav-item" data-view="history">
+          <span class="icon">📜</span>
+          <span>Transaction History</span>
+        </a>
+        <a href="#" class="nav-item" data-view="users">
+          <span class="icon">👥</span>
+          <span>Users</span>
+        </a>
+        <a href="#" class="nav-item" data-view="settings">
+          <span class="icon">⚙️</span>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="logoutBtn" class="btn btn-danger btn-block">
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="dashboard-header">
+        <button class="hamburger-menu" id="hamburgerMenu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div class="header-left">
+          <h1 id="pageTitle">Overview</h1>
+        </div>
+        <div class="header-right">
+          <button class="theme-toggle" id="adminThemeToggle" title="Toggle theme">
+            <span id="adminThemeIcon">🌙</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content-area">
+        <!-- Overview View -->
+        <div id="overviewView" class="view-content active">
+          <div class="stats-grid">
+            <div class="stat-card stat-pending">
+              <div class="stat-icon">⏳</div>
+              <div class="stat-info">
+                <h3>Pending Deposits</h3>
+                <p class="stat-value" id="pendingDepositsCount">0</p>
+              </div>
+            </div>
+
+            <div class="stat-card stat-pending">
+              <div class="stat-icon">⏳</div>
+              <div class="stat-info">
+                <h3>Pending Withdrawals</h3>
+                <p class="stat-value" id="pendingWithdrawalsCount">0</p>
+              </div>
+            </div>
+
+            <div class="stat-card stat-success">
+              <div class="stat-icon">✅</div>
+              <div class="stat-info">
+                <h3>Total Approved Deposits</h3>
+                <p class="stat-value" id="totalApprovedDeposits">₹0.00</p>
+              </div>
+            </div>
+
+            <div class="stat-card stat-success">
+              <div class="stat-icon">✅</div>
+              <div class="stat-info">
+                <h3>Total Completed Withdrawals</h3>
+                <p class="stat-value" id="totalCompletedWithdrawals">₹0.00</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="quick-actions">
+            <h2>Quick Actions</h2>
+            <div class="action-buttons">
+              <button class="btn btn-primary" data-view="deposits">Review Deposits</button>
+              <button class="btn btn-primary" data-view="withdrawals">Review Withdrawals</button>
+              <button class="btn btn-secondary" data-view="settings">Update Settings</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deposits View -->
+        <div id="depositsView" class="view-content">
+          <div class="requests-container">
+            <div class="requests-header">
+              <h2>Pending Deposit Requests</h2>
+              <button id="refreshDeposits" class="btn btn-secondary">🔄 Refresh</button>
+            </div>
+
+            <div id="depositsList" class="requests-list">
+              <p class="loading-text">Loading deposits...</p>
+            </div>
+
+            <div id="depositsPagination" class="pagination"></div>
+          </div>
+        </div>
+
+        <!-- Withdrawals View -->
+        <div id="withdrawalsView" class="view-content">
+          <div class="requests-container">
+            <div class="requests-header">
+              <h2>Pending Withdrawal Requests</h2>
+              <button id="refreshWithdrawals" class="btn btn-secondary">🔄 Refresh</button>
+            </div>
+
+            <div id="withdrawalsList" class="requests-list">
+              <p class="loading-text">Loading withdrawals...</p>
+            </div>
+
+            <div id="withdrawalsPagination" class="pagination"></div>
+          </div>
+        </div>
+
+        <!-- History View -->
+        <div id="historyView" class="view-content">
+          <div class="requests-container">
+            <div class="requests-header">
+              <h2>Transaction History</h2>
+              <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">All</button>
+                <button class="filter-tab" data-filter="deposit">Deposits</button>
+                <button class="filter-tab" data-filter="withdrawal">Withdrawals</button>
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table class="history-table" id="historyTable">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>User</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                  <tr>
+                    <td colspan="6" class="loading-text">Loading history...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div id="historyPagination" class="pagination"></div>
+          </div>
+        </div>
+
+        <!-- Settings View -->
+        <div id="settingsView" class="view-content">
+          <div class="settings-container">
+            <!-- Settings Tabs -->
+            <div class="settings-tabs">
+              <button class="settings-tab active" data-tab="personal">👤 Personal Info</button>
+              <button class="settings-tab" data-tab="password">🔒 Password</button>
+              <button class="settings-tab" data-tab="payment">Payment Settings</button>
+            </div>
+
+            <!-- Personal Info Settings -->
+            <div id="personalSettings" class="settings-section active">
+              <h2>Personal Information</h2>
+              
+              <form id="adminPersonalForm" class="settings-form">
+                <div class="form-group">
+                  <label for="adminName">Full Name</label>
+                  <input 
+                    type="text" 
+                    id="adminName" 
+                    name="name" 
+                    placeholder="Enter your full name"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label for="adminEmail">Email Address</label>
+                  <input 
+                    type="email" 
+                    id="adminEmail" 
+                    name="email" 
+                    placeholder="Enter your email address"
+                    required
+                  >
+                  <small style="color: var(--text-secondary); font-size: 0.875rem;">
+                    Make sure you remember your new email for future logins
+                  </small>
+                </div>
+
+                <div class="form-group">
+                  <label for="adminMobile">Mobile Number</label>
+                  <input 
+                    type="tel" 
+                    id="adminMobile" 
+                    name="mobileNumber" 
+                    placeholder="Enter 10-digit mobile number"
+                    maxlength="10"
+                    pattern="[0-9]{10}"
+                  >
+                  <small style="color: var(--text-secondary); font-size: 0.875rem;">
+                    Enter 10-digit mobile number without country code
+                  </small>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Update Information</button>
+              </form>
+            </div>
+
+            <!-- Password Settings -->
+            <div id="passwordSettings" class="settings-section">
+              <h2>Change Password</h2>
+              
+              <form id="adminPasswordForm" class="settings-form">
+                <div class="form-group">
+                  <label for="adminCurrentPassword">Current Password</label>
+                  <div class="password-input-wrapper">
+                    <input 
+                      type="password" 
+                      id="adminCurrentPassword" 
+                      name="currentPassword" 
+                      required 
+                      placeholder="Enter current password"
+                    >
+                    <button type="button" class="toggle-password" aria-label="Show password">
+                      <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                      <svg class="eye-off-icon hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="adminNewPassword">New Password</label>
+                  <div class="password-input-wrapper">
+                    <input 
+                      type="password" 
+                      id="adminNewPassword" 
+                      name="newPassword" 
+                      required 
+                      minlength="8"
+                      placeholder="Enter new password (min 8 characters)"
+                    >
+                    <button type="button" class="toggle-password" aria-label="Show password">
+                      <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                      <svg class="eye-off-icon hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="adminConfirmPassword">Confirm New Password</label>
+                  <div class="password-input-wrapper">
+                    <input 
+                      type="password" 
+                      id="adminConfirmPassword" 
+                      name="confirmPassword" 
+                      required 
+                      minlength="8"
+                      placeholder="Re-enter new password"
+                    >
+                    <button type="button" class="toggle-password" aria-label="Show password">
+                      <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                      <svg class="eye-off-icon hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Change Password</button>
+              </form>
+            </div>
+
+            <!-- Payment Settings -->
+            <div id="paymentSettings" class="settings-section">
+              <h2>Payment Settings</h2>
+              
+              <form id="upiForm" class="settings-form">
+                <div class="form-group">
+                  <label for="upiId">UPI ID</label>
+                  <input 
+                    type="text" 
+                    id="upiId" 
+                    name="upiId" 
+                    required 
+                    placeholder="yourname@upi"
+                  >
+                  <small class="form-hint">This UPI ID will be shown to users for deposits</small>
+                </div>
+                <button type="submit" class="btn btn-primary">Update UPI ID</button>
+              </form>
+
+              <form id="qrForm" class="settings-form">
+                <div class="form-group">
+                  <label for="qrCode">QR Code Image</label>
+                  <input 
+                    type="file" 
+                    id="qrCode" 
+                    name="qrCode" 
+                    required 
+                    accept="image/*"
+                  >
+                  <small class="form-hint">Upload QR code image for UPI payments</small>
+                </div>
+                
+                <div id="currentQR" class="current-qr">
+                  <p>Current QR Code:</p>
+                  <img id="qrPreview" src="" alt="QR Code" style="display: none;">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Upload QR Code</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Users View -->
+        <div id="usersView" class="view-content">
+          <div class="users-container">
+            <div class="users-header">
+              <h2>User Management</h2>
+              <div class="users-stats">
+                <span class="stat-item">Total Users: <strong id="totalUsersCount">0</strong></span>
+                <span class="stat-item">Active: <strong id="activeUsersCount">0</strong></span>
+                <span class="stat-item">Inactive: <strong id="inactiveUsersCount">0</strong></span>
+              </div>
+            </div>
+
+            <div class="users-search">
+              <input type="text" id="userSearchInput" placeholder="Search users by name or email..." class="search-input">
+              <button id="refreshUsers" class="btn btn-secondary">🔄 Refresh</button>
+            </div>
+
+            <div class="users-table-container">
+              <table class="users-table" id="usersTable">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Aadhar Number</th>
+                    <th>PAN Number</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Balance</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                  <tr>
+                    <td colspan="8" class="loading-text">Loading users...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div id="usersPagination" class="pagination"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="bottom-nav">
+      <div class="bottom-nav-items">
+        <a href="#" class="bottom-nav-item active" data-view="overview">
+          <span class="icon">📊</span>
+          <span>Home</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-view="deposits">
+          <span class="icon">💰</span>
+          <span>Deposits</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-view="withdrawals">
+          <span class="icon">💸</span>
+          <span>Withdrawals</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-view="history">
+          <span class="icon">📜</span>
+          <span>History</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-view="users">
+          <span class="icon">👥</span>
+          <span>Users</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-view="settings">
+          <span class="icon">⚙️</span>
+          <span>Settings</span>
+        </a>
+      </div>
+    </nav>
+  </div>
+
+  <!-- User Transaction History Modal -->
+  <div id="userHistoryModal" class="modal">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h2 id="userHistoryTitle">User Transaction History</h2>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="user-info-card">
+          <div class="user-avatar" id="modalUserAvatar">U</div>
+          <div class="user-details">
+            <h3 id="modalUserName">User Name</h3>
+            <p id="modalUserEmail">user@example.com</p>
+            <div class="user-stats">
+              <span class="stat">Balance: <strong id="modalUserBalance">₹0.00</strong></span>
+              <span class="stat">Total Transactions: <strong id="modalUserTxCount">0</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="transaction-filters">
+          <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">All</button>
+            <button class="filter-tab" data-filter="deposit">Deposits</button>
+            <button class="filter-tab" data-filter="withdrawal">Withdrawals</button>
+          </div>
+        </div>
+
+        <div class="modal-transactions-list" id="modalTransactionsList">
+          <p class="loading-text">Loading transactions...</p>
+        </div>
+
+        <div id="modalTransactionsPagination" class="pagination"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deposit Details Modal -->
+  <div id="depositModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Deposit Request Details</h2>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="depositModalBody">
+        <!-- Content will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Withdrawal Details Modal -->
+  <div id="withdrawalModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Withdrawal Request Details</h2>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="withdrawalModalBody">
+        <!-- Content will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/pwa-install.js"></script>
+  <script type="module" src="../js/pages/admin-dashboard.js"></script>
+</body>
+</html>

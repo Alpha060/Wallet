@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Complete KYC Management and Verification System">
+  <meta name="theme-color" content="#4F46E5">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="KYC App">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  
+  <!-- Apple Touch Icons -->
+  <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png">
+  
+  <title>User Dashboard - KYC Management System</title>
+  <script src="../js/cache-buster.js"></script>
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/typography.css">
+  <link rel="stylesheet" href="../css/utilities.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/mobile.css">
+</head>
+<body>
+  <!-- Mobile Overlay -->
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+
+  <div class="dashboard-container">
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+      <div class="mobile-header-left">
+        <div class="mobile-user-avatar clickable" id="mobileUserAvatar">U</div>
+        <div class="mobile-header-info">
+          <p class="welcome-text">Welcome back,</p>
+          <h1 class="mobile-header-title" id="mobilePageTitle">User</h1>
+        </div>
+      </div>
+      <div class="mobile-header-right">
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+          <span id="themeIcon">🌙</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <!-- Profile Section (Desktop & Mobile) -->
+      <div class="sidebar-profile">
+        <div class="sidebar-profile-info">
+          <div class="sidebar-profile-avatar" id="sidebarUserAvatar">U</div>
+          <div class="sidebar-profile-details">
+            <h3 id="sidebarUserName">User</h3>
+            <p id="sidebarUserEmail">user@example.com</p>
+            <span class="sidebar-profile-badge">User Account</span>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-view="overview">
+          <span class="icon">📊</span>
+          <span>Overview</span>
+        </a>
+        <a href="#" class="nav-item" data-view="deposit">
+          <span class="icon">💰</span>
+          <span>Deposit</span>
+        </a>
+        <a href="#" class="nav-item" data-view="withdraw">
+          <span class="icon">💸</span>
+          <span>Withdraw</span>
+        </a>
+        <a href="#" class="nav-item" data-view="history">
+          <span class="icon">📜</span>
+          <span>History</span>
+        </a>
+        <a href="#" class="nav-item" data-view="settings">
+          <span class="icon">⚙️</span>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="logoutBtn" class="btn btn-danger btn-block">
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="dashboard-header">
+        <button class="hamburger-menu" id="hamburgerMenu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div class="header-left">
+          <h1 id="pageTitle">Overview</h1>
+        </div>
+        <div class="header-right">
+          <button class="theme-toggle" id="desktopThemeToggle" title="Toggle theme">
+            <span id="desktopThemeIcon">🌙</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content-area">
+        <!-- Overview View -->
+        <div id="overviewView" class="view-content active">
+          <!-- Profile Completion Banner -->
+          <div id="profileCompletionBanner" class="profile-completion-banner" style="display: none;">
+            <div class="banner-icon">⚠️</div>
+            <div class="banner-content">
+              <strong>Complete Your Profile</strong> - Add your KYC details to continue using all features.
+            </div>
+            <button class="banner-action" onclick="goToProfileSettings()">
+              Complete Now
+            </button>
+            <button class="banner-close" onclick="closeBanner()" title="Close">
+              ×
+            </button>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">💳</div>
+              <div class="stat-info">
+                <h3>Current Balance</h3>
+                <p class="stat-value" id="totalBalance">₹0.00</p>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon stat-icon-deposit">↓</div>
+              <div class="stat-info">
+                <h3>Total Deposits</h3>
+                <p class="stat-value" id="totalDeposits">₹0.00</p>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon stat-icon-withdrawal">↑</div>
+              <div class="stat-info">
+                <h3>Total Withdrawals</h3>
+                <p class="stat-value" id="totalWithdrawals">₹0.00</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="recent-transactions">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h2>Recent Transactions</h2>
+              <a href="#" class="view-all-link" data-view="history">View All →</a>
+            </div>
+            <div id="recentTransactionsList" class="transactions-list">
+              <p class="loading-text">Loading transactions...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deposit View -->
+        <div id="depositView" class="view-content">
+          <div class="deposit-container">
+            <!-- Available Balance Card -->
+            <div class="deposit-balance-card">
+              <div class="balance-header">
+                <span class="balance-icon">💳</span>
+                <div class="balance-info">
+                  <p class="balance-label">Available Balance</p>
+                  <h2 class="balance-amount" id="depositAvailableBalance">₹0.00</h2>
+                </div>
+              </div>
+            </div>
+
+            <form id="depositForm" class="deposit-form">
+              <!-- Amount Selection Card -->
+              <div class="deposit-card">
+                <div class="card-header">
+                  <h3 class="card-title">💰 Enter Amount</h3>
+                </div>
+                <div class="card-content">
+                  <div class="amount-input-wrapper">
+                    <span class="currency-symbol">₹</span>
+                    <input 
+                      type="number" 
+                      id="depositAmount" 
+                      name="amount" 
+                      required 
+                      min="1"
+                      step="1"
+                      placeholder="2000"
+                      class="amount-input-large"
+                    >
+                  </div>
+                  
+                  <!-- Quick Amount Buttons -->
+                  <div class="quick-amount-buttons">
+                    <button type="button" class="quick-amount-btn" data-amount="500">₹500</button>
+                    <button type="button" class="quick-amount-btn" data-amount="2000">₹2000</button>
+                    <button type="button" class="quick-amount-btn" data-amount="5000">₹5000</button>
+                  </div>
+
+                  <!-- View Payment Details Button -->
+                  <button type="button" id="viewPaymentDetailsBtn" class="btn btn-secondary btn-view-payment">
+                    <span class="btn-icon">👁️</span>
+                    View QR code
+                  </button>
+                </div>
+              </div>
+
+              <!-- Upload Proof Card -->
+              <div class="deposit-card">
+                <div class="card-header">
+                  <h3 class="card-title">📸 Upload Payment Proof</h3>
+                </div>
+                <div class="card-content">
+                  <div class="form-group">
+                    <label for="paymentProof">Payment Screenshot *</label>
+                    <div class="file-upload-wrapper">
+                      <input 
+                        type="file" 
+                        id="paymentProof" 
+                        name="paymentProof" 
+                        required 
+                        accept="image/*"
+                        class="file-input"
+                      >
+                      <div class="file-upload-placeholder">
+                        <span class="upload-icon">📁</span>
+                        <span class="upload-text">Choose payment screenshot</span>
+                      </div>
+                    </div>
+                    <small class="form-hint">Upload screenshot of payment confirmation</small>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="transactionId">Transaction ID (Optional)</label>
+                    <input 
+                      type="text" 
+                      id="transactionId" 
+                      name="transactionId" 
+                      placeholder="Enter transaction ID if available"
+                      class="form-input"
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="submit-section">
+                <button type="submit" class="btn btn-primary btn-deposit-submit">
+                  <span class="btn-icon">✓</span>
+                  Submit Deposit Request
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Withdraw View -->
+        <div id="withdrawView" class="view-content">
+          <div class="withdraw-container">
+            <!-- Available Balance Card -->
+            <div class="withdraw-balance-card">
+              <div class="balance-header">
+                <span class="balance-icon">💳</span>
+                <div class="balance-info">
+                  <p class="balance-label">Available for Withdrawal</p>
+                  <h2 class="balance-amount" id="withdrawableBalance">₹0.00</h2>
+                  <p class="max-hint">Max: <span id="maxWithdrawAmount">₹0.00</span></p>
+                </div>
+              </div>
+            </div>
+
+            <form id="withdrawForm" class="withdraw-form">
+              <!-- Amount Selection Card -->
+              <div class="withdraw-card">
+                <div class="card-header">
+                  <h3 class="card-title">💰 Withdrawal Amount</h3>
+                </div>
+                <div class="card-content">
+                  <div class="amount-input-wrapper">
+                    <span class="currency-symbol">₹</span>
+                    <input 
+                      type="number" 
+                      id="withdrawAmount" 
+                      class="amount-input-large"
+                      name="amount" 
+                      required 
+                      min="100"
+                      step="1"
+                      placeholder="500"
+                      value="500"
+                    >
+                  </div>
+
+                  <!-- Quick Amount Buttons -->
+                  <div class="quick-amount-buttons">
+                    <button type="button" class="quick-amount-btn" data-amount="500">₹500</button>
+                    <button type="button" class="quick-amount-btn" data-amount="2000">₹2,000</button>
+                    <button type="button" class="quick-amount-btn" data-amount="max">Max</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payment Method Card -->
+              <div class="withdraw-card">
+                <div class="card-header">
+                  <h3 class="card-title">🏦 Transfer Method</h3>
+                  <div class="secure-badge">
+                    <span class="secure-icon">🔒</span>
+                    <span>Secure Transfer</span>
+                  </div>
+                </div>
+                <div class="card-content">
+                  <!-- Payment Methods -->
+                  <div class="payment-methods-grid">
+                    <!-- UPI Method -->
+                    <div class="payment-method-card" data-method="upi">
+                      <input type="radio" name="withdrawMethod" value="upi" id="upiRadio" checked>
+                      <label for="upiRadio" class="method-label">
+                        <div class="method-icon upi-icon">
+                          <span>UPI</span>
+                        </div>
+                        <div class="method-info">
+                          <p class="method-title">UPI Transfer</p>
+                          <p class="method-desc">Instant transfer</p>
+                        </div>
+                        <div class="method-check">✓</div>
+                      </label>
+                    </div>
+
+                    <!-- Bank Account Method -->
+                    <div class="payment-method-card" data-method="bank">
+                      <input type="radio" name="withdrawMethod" value="bank" id="bankRadio">
+                      <label for="bankRadio" class="method-label">
+                        <div class="method-icon bank-icon">
+                          <span>🏦</span>
+                        </div>
+                        <div class="method-info">
+                          <p class="method-title">Bank Account</p>
+                          <p class="method-desc">NEFT/IMPS transfer</p>
+                        </div>
+                        <div class="method-check">✓</div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- UPI Details -->
+                  <div id="upiDetailsExpanded" class="payment-details-card">
+                    <div class="details-header">
+                      <span class="details-icon">📱</span>
+                      <h4>UPI Details</h4>
+                    </div>
+                    <div class="form-group">
+                      <label for="upiId">UPI ID</label>
+                      <input 
+                        type="text" 
+                        id="upiId" 
+                        placeholder="Enter UPI ID (e.g., john.doe@okhdfc)"
+                        class="form-input"
+                      >
+                    </div>
+                  </div>
+
+                  <!-- Bank Details -->
+                  <div id="bankDetailsExpanded" class="payment-details-card" style="display: none;">
+                    <div class="details-header">
+                      <span class="details-icon">🏦</span>
+                      <h4>Bank Account Details</h4>
+                    </div>
+                    <div class="form-group">
+                      <label for="accountName">Account Holder Name</label>
+                      <input 
+                        type="text" 
+                        id="accountName" 
+                        placeholder="Enter account holder name"
+                        class="form-input"
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label for="ifscCode">IFSC Code</label>
+                      <input 
+                        type="text" 
+                        id="ifscCode" 
+                        placeholder="e.g., SBIN0001234"
+                        class="form-input"
+                        pattern="[A-Z]{4}0[A-Z0-9]{6}"
+                        maxlength="11"
+                      >
+                      <small class="form-hint">11 characters: 4 letters + 0 + 6 letters/numbers</small>
+                    </div>
+                    <div class="form-group">
+                      <label for="accountNumber">Account Number</label>
+                      <input 
+                        type="text" 
+                        id="accountNumber" 
+                        placeholder="Enter account number"
+                        class="form-input"
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Swipe to Withdraw Card -->
+              <div class="withdraw-card">
+                <div class="card-content">
+                  <div class="swipe-button-container">
+                    <div class="swipe-button" id="swipeButton">
+                      <div class="swipe-progress" id="swipeProgress"></div>
+                      <div class="swipe-slider" id="swipeSlider">
+                        <span class="swipe-icon">»</span>
+                      </div>
+                      <span class="swipe-text">SWIPE TO WITHDRAW</span>
+                      <span class="swipe-text-filled" id="swipeTextFilled">SWIPE TO WITHDRAW</span>
+                    </div>
+                  </div>
+
+                  <div class="security-info">
+                    <span class="security-icon">🔒</span>
+                    <span>Secured by 256-bit Encryption</span>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- History View -->
+        <div id="historyView" class="view-content">
+          <div class="history-container">
+            <div class="history-filters">
+              <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">All</button>
+                <button class="filter-tab" data-filter="deposit">Deposits</button>
+                <button class="filter-tab" data-filter="withdrawal">Withdrawals</button>
+              </div>
+              
+              <div class="date-filters">
+                <div class="date-filter-group">
+                  <label for="startDate">From:</label>
+                  <input type="date" id="startDate" class="date-input">
+                </div>
+                <div class="date-filter-group">
+                  <label for="endDate">To:</label>
+                  <input type="date" id="endDate" class="date-input">
+                </div>
+                <button id="searchByDate" class="btn btn-primary btn-sm">🔍</button>
+                <button id="clearDateFilter" class="btn btn-secondary btn-sm">✕</button>
+              </div>
+            </div>
+
+            <div id="historyTransactionsList" class="transactions-list">
+              <p class="loading-text">Loading history...</p>
+            </div>
+
+            <div id="historyPagination" class="pagination"></div>
+          </div>
+        </div>
+
+        <!-- Settings View -->
+        <div id="settingsView" class="view-content">
+          <div class="settings-container">
+            <!-- Settings Navigation Card -->
+            <div class="settings-nav-card">
+              <div class="card-header">
+                <h3 class="card-title">⚙️ Account Settings</h3>
+              </div>
+              <div class="settings-tabs">
+                <button class="settings-tab active" data-tab="profile">
+                  <span class="tab-icon">👤</span>
+                  <span>Profile</span>
+                </button>
+                <button class="settings-tab" data-tab="password">
+                  <span class="tab-icon">🔒</span>
+                  <span>Password</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Profile Settings -->
+            <div id="profileSettings" class="settings-section active">
+              <div class="settings-card">
+                <div class="card-header">
+                  <h3 class="card-title">👤 Profile Information</h3>
+                  <div class="info-badge">
+                    <span class="info-icon">ℹ️</span>
+                    <span>Update your personal details</span>
+                  </div>
+                </div>
+                <div class="card-content">
+                  <form id="profileForm" class="settings-form">
+                    <div class="form-group">
+                      <label for="profileName">Full Name</label>
+                      <input 
+                        type="text" 
+                        id="profileName" 
+                        name="name" 
+                        placeholder="Enter your full name"
+                        class="form-input"
+                      >
+                    </div>
+
+                    <div class="form-group">
+                      <label for="profileEmail">Email Address</label>
+                      <input 
+                        type="email" 
+                        id="profileEmail" 
+                        name="email" 
+                        disabled
+                        class="form-input disabled"
+                      >
+                      <small class="form-hint">
+                        Email cannot be changed for security reasons
+                      </small>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="profileMobile">Mobile Number <span class="required">*</span></label>
+                      <input 
+                        type="tel" 
+                        id="profileMobile" 
+                        name="mobileNumber" 
+                        placeholder="Enter 10-digit mobile number"
+                        class="form-input"
+                        maxlength="10"
+                        pattern="[0-9]{10}"
+                      >
+                      <small class="form-hint">
+                        Enter 10-digit mobile number without country code
+                      </small>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="profileDOB">Date of Birth <span class="required">*</span></label>
+                      <input 
+                        type="date" 
+                        id="profileDOB" 
+                        name="dateOfBirth" 
+                        class="form-input"
+                        max="2010-12-31"
+                      >
+                    </div>
+
+                    <div class="form-group">
+                      <label for="profileAadhar">Aadhar Number <span class="required">*</span></label>
+                      <input 
+                        type="text" 
+                        id="profileAadhar" 
+                        name="aadharNumber" 
+                        placeholder="Enter 12-digit Aadhar number"
+                        class="form-input"
+                        maxlength="12"
+                        pattern="[0-9]{12}"
+                      >
+                      <small class="form-hint">
+                        Your Aadhar information is securely encrypted
+                      </small>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="profilePAN">PAN Number <span class="required">*</span></label>
+                      <input 
+                        type="text" 
+                        id="profilePAN" 
+                        name="panNumber" 
+                        placeholder="Enter PAN (e.g., ABCDE1234F)"
+                        class="form-input"
+                        maxlength="10"
+                        pattern="[A-Za-z]{5}[0-9]{4}[A-Za-z]{1}"
+                        style="text-transform: uppercase;"
+                      >
+                      <small class="form-hint">
+                        Format: 5 letters, 4 digits, 1 letter (e.g., ABCDE1234F)
+                      </small>
+                    </div>
+
+                    <div class="submit-section">
+                      <button type="submit" class="btn btn-primary btn-settings-submit">
+                        <span class="btn-icon">✓</span>
+                        Update Profile
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- Password Settings -->
+            <div id="passwordSettings" class="settings-section">
+              <div class="settings-card">
+                <div class="card-header">
+                  <h3 class="card-title">🔒 Change Password</h3>
+                  <div class="security-badge">
+                    <span class="secure-icon">🛡️</span>
+                    <span>Secure your account</span>
+                  </div>
+                </div>
+                <div class="card-content">
+                  <form id="passwordForm" class="settings-form">
+                    <div class="form-group">
+                      <label for="currentPassword">Current Password</label>
+                      <div class="password-input-wrapper">
+                        <input 
+                          type="password" 
+                          id="currentPassword" 
+                          name="currentPassword" 
+                          required
+                          placeholder="Enter current password"
+                          class="form-input"
+                        >
+                        <button type="button" class="toggle-password" aria-label="Show password">
+                          <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                          </svg>
+                          <svg class="eye-off-icon hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                            <line x1="1" y1="1" x2="23" y2="23"></line>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="newPassword">New Password</label>
+                      <div class="password-input-wrapper">
+                        <input 
+                          type="password" 
+                          id="newPassword" 
+                          name="newPassword" 
+                          required
+                          minlength="8"
+                          placeholder="Enter new password (min 8 characters)"
+                          class="form-input"
+                        >
+                        <button type="button" class="toggle-password" aria-label="Show password">
+                          <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                          </svg>
+                          <svg class="eye-off-icon hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                            <line x1="1" y1="1" x2="23" y2="23"></line>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="confirmNewPassword">Confirm New Password</label>
+                      <div class="password-input-wrapper">
+                        <input 
+                          type="password" 
+                          id="confirmNewPassword" 
+                          name="confirmNewPassword" 
+                          required
+                          minlength="8"
+                          placeholder="Re-enter new password"
+                          class="form-input"
+                        >
+                        <button type="button" class="toggle-password" aria-label="Show password">
+                          <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                          </svg>
+                          <svg class="eye-off-icon hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                            <line x1="1" y1="1" x2="23" y2="23"></line>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="password-requirements">
+                      <h4>Password Requirements:</h4>
+                      <ul>
+                        <li>At least 8 characters long</li>
+                        <li>Mix of letters and numbers recommended</li>
+                        <li>Avoid using personal information</li>
+                      </ul>
+                    </div>
+
+                    <div class="submit-section">
+                      <button type="submit" class="btn btn-primary btn-settings-submit">
+                        <span class="btn-icon">🔒</span>
+                        Change Password
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="bottom-nav">
+      <div class="bottom-nav-items">
+        <a href="#" class="bottom-nav-item active" data-view="overview">
+          <span class="icon">📊</span>
+          <span>Home</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-view="deposit">
+          <span class="icon">💰</span>
+          <span>Deposit</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-view="withdraw">
+          <span class="icon">💸</span>
+          <span>Withdraw</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-view="history">
+          <span class="icon">📜</span>
+          <span>History</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-view="settings">
+          <span class="icon">⚙️</span>
+          <span>Settings</span>
+        </a>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Payment Details Modal -->
+  <div id="paymentDetailsModal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">📱 Payment Details</h3>
+        <button class="modal-close" id="closePaymentModal" title="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="secure-badge-modal">
+          <span class="secure-icon">🔒</span>
+          <span>Secure Payment</span>
+        </div>
+        <div id="paymentDetailsModalContent" class="qr-display">
+          <p class="loading-text">Loading payment details...</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="closePaymentModalBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/pwa-install.js"></script>
+  <script type="module" src="../js/pages/user-dashboard.js"></script>
+</body>
+</html>
