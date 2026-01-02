@@ -1167,6 +1167,25 @@ async function loadHistory() {
       }
     }
 
+    if (currentHistoryFilter === 'all' || currentHistoryFilter === 'bonus') {
+      // Fetch bonus claims
+      try {
+        let page = 1;
+        let hasMore = true;
+        while (hasMore) {
+          const claimsData = await api.getClaimHistory(page, 100);
+          allTransactions = allTransactions.concat(
+            claimsData.claims.map(c => ({ ...c, type: 'bonus' }))
+          );
+          hasMore = claimsData.claims.length === 100;
+          page++;
+          if (page > 10) break; // Safety limit
+        }
+      } catch (e) {
+        console.log('Bonus claims not available');
+      }
+    }
+
     // Filter by date if specified
     if (historyStartDate || historyEndDate) {
       allTransactions = allTransactions.filter(tx => {
@@ -1196,24 +1215,49 @@ async function loadHistory() {
     const pageTransactions = allTransactions.slice(startIndex, endIndex);
 
     // Display transactions
-    container.innerHTML = pageTransactions.map(tx => `
-      <div class="transaction-item">
-        <div class="transaction-icon ${tx.type === 'deposit' ? 'icon-deposit' : 'icon-withdrawal'}">
-          ${tx.type === 'deposit' ? '📥' : '📤'}
+    container.innerHTML = pageTransactions.map(tx => {
+      // Determine icon and styling based on type
+      let icon, iconClass, title, amountClass, amountPrefix;
+      
+      if (tx.type === 'deposit') {
+        icon = '📥';
+        iconClass = 'icon-deposit';
+        title = 'Deposit';
+        amountClass = 'amount-positive';
+        amountPrefix = '+';
+      } else if (tx.type === 'withdrawal') {
+        icon = '📤';
+        iconClass = 'icon-withdrawal';
+        title = 'Withdrawal';
+        amountClass = 'amount-negative';
+        amountPrefix = '-';
+      } else if (tx.type === 'bonus') {
+        icon = '🎁';
+        iconClass = 'icon-bonus';
+        title = `Bonus from ${escapeHtml(tx.referredUserName || 'Referral')}`;
+        amountClass = 'amount-positive';
+        amountPrefix = '+';
+      }
+
+      return `
+        <div class="transaction-item">
+          <div class="transaction-icon ${iconClass}">
+            ${icon}
+          </div>
+          <div class="transaction-details">
+            <h4>${title}</h4>
+            <p class="transaction-date">${formatDate(tx.createdAt)}</p>
+            ${tx.transactionId ? `<p class="transaction-id">TXN: ${escapeHtml(tx.transactionId)}</p>` : ''}
+          </div>
+          <div class="transaction-amount">
+            <p class="amount ${amountClass}">
+              ${amountPrefix}${formatAmount(tx.amount)}
+            </p>
+            <span class="status-badge ${getStatusClass(tx.status)}">${escapeHtml(tx.status)}</span>
+          </div>
         </div>
-        <div class="transaction-details">
-          <h4>${tx.type === 'deposit' ? 'Deposit' : 'Withdrawal'}</h4>
-          <p class="transaction-date">${formatDate(tx.createdAt)}</p>
-          ${tx.transactionId ? `<p class="transaction-id">TXN: ${escapeHtml(tx.transactionId)}</p>` : ''}
-        </div>
-        <div class="transaction-amount">
-          <p class="amount ${tx.type === 'deposit' ? 'amount-positive' : 'amount-negative'}">
-            ${tx.type === 'deposit' ? '+' : '-'}${formatAmount(tx.amount)}
-          </p>
-          <span class="status-badge ${getStatusClass(tx.status)}">${escapeHtml(tx.status)}</span>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
     // Render pagination
     renderHistoryPagination(totalPages);

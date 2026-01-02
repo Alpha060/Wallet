@@ -85,6 +85,11 @@
           <span>Pending Withdrawals</span>
           <span class="badge" id="withdrawalsBadge">0</span>
         </a>
+        <a href="#" class="nav-item" data-view="bonusClaims">
+          <span class="icon">🎁</span>
+          <span>Bonus Claims</span>
+          <span class="badge" id="bonusClaimsBadge">0</span>
+        </a>
         <a href="#" class="nav-item" data-view="history">
           <span class="icon">📜</span>
           <span>Transaction History</span>
@@ -202,6 +207,22 @@
             </div>
 
             <div id="withdrawalsPagination" class="pagination"></div>
+          </div>
+        </div>
+
+        <!-- Bonus Claims View -->
+        <div id="bonusClaimsView" class="view-content">
+          <div class="requests-container">
+            <div class="requests-header">
+              <h2>Pending Bonus Claims</h2>
+              <button id="refreshBonusClaims" class="btn btn-secondary">🔄 Refresh</button>
+            </div>
+
+            <div id="bonusClaimsList" class="requests-list">
+              <p class="loading-text">Loading bonus claims...</p>
+            </div>
+
+            <div id="bonusClaimsPagination" class="pagination"></div>
           </div>
         </div>
 

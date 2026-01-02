@@ -456,6 +456,7 @@
                 <button class="filter-tab active" data-filter="all">All</button>
                 <button class="filter-tab" data-filter="deposit">Deposits</button>
                 <button class="filter-tab" data-filter="withdrawal">Withdrawals</button>
+                <button class="filter-tab" data-filter="bonus">Bonus</button>
               </div>
               
               <div class="date-filters">
@@ -505,7 +506,25 @@
                   </div>
                 </div>
                 <div class="referral-info">
-                  <p>Share your referral code with friends and earn rewards when they sign up!</p>
+                  <p>Share your referral code with friends and earn 5% bonus when they deposit!</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Claimable Bonus Card -->
+            <div class="referral-bonus-card">
+              <div class="card-header">
+                <h3 class="card-title">💰 Claimable Bonus</h3>
+              </div>
+              <div class="card-content">
+                <div class="bonus-summary">
+                  <div class="bonus-total">
+                    <p class="bonus-label">Available to Claim</p>
+                    <p class="bonus-value" id="claimableAmount">₹0.00</p>
+                  </div>
+                </div>
+                <div id="unclaimedBonusesList" class="unclaimed-bonuses-list">
+                  <p class="loading-text">Loading bonuses...</p>
                 </div>
               </div>
             </div>
@@ -521,6 +540,12 @@
                     <div class="stat-details">
                       <p class="stat-label">Total Referrals</p>
                       <p class="stat-value" id="totalReferralsCount">0</p>
+                    </div>
+                  </div>
+                  <div class="stat-item">
+                    <div class="stat-details">
+                      <p class="stat-label">Total Earned</p>
+                      <p class="stat-value" id="totalBonusEarned">₹0.00</p>
                     </div>
                   </div>
                 </div>
@@ -795,7 +820,7 @@
           <span>Withdraw</span>
         </a>
         <a href="#" class="bottom-nav-item" data-view="history">
-          <span class="icon">�</spaan>
+          <span class="icon">📜</span>
           <span>History</span>
         </a>
         <a href="#" class="bottom-nav-item" data-view="settings">

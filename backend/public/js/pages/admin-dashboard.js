@@ -18,6 +18,7 @@ let currentDepositPage = 1;
 let currentWithdrawalPage = 1;
 let currentHistoryPage = 1;
 let currentHistoryFilter = 'all';
+let currentBonusClaimsPage = 1;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -131,6 +132,17 @@ async function loadOverview() {
     // Update badges
     document.getElementById('depositsBadge').textContent = stats.pendingDepositsCount;
     document.getElementById('withdrawalsBadge').textContent = stats.pendingWithdrawalsCount;
+
+    // Load bonus claims count
+    try {
+      const bonusClaimsData = await api.getPendingBonusClaims(1, 1);
+      const bonusClaimsBadge = document.getElementById('bonusClaimsBadge');
+      if (bonusClaimsBadge) {
+        bonusClaimsBadge.textContent = bonusClaimsData.total || 0;
+      }
+    } catch (e) {
+      console.log('Bonus claims not available yet');
+    }
   } catch (error) {
     console.error('Error loading overview:', error);
   }
@@ -186,6 +198,7 @@ function switchView(view) {
     overview: 'Overview',
     deposits: 'Pending Deposits',
     withdrawals: 'Pending Withdrawals',
+    bonusClaims: 'Bonus Claims',
     history: 'Transaction History',
     users: 'Users',
     settings: 'Settings'
@@ -203,6 +216,8 @@ function switchView(view) {
     loadPendingDeposits();
   } else if (view === 'withdrawals') {
     loadPendingWithdrawals();
+  } else if (view === 'bonusClaims') {
+    loadPendingBonusClaims();
   } else if (view === 'history') {
     loadHistory();
   } else if (view === 'users') {
@@ -585,7 +600,83 @@ function setupRefreshButtons() {
     loadPendingWithdrawals();
     loadOverview();
   });
+
+  const refreshBonusClaims = document.getElementById('refreshBonusClaims');
+  if (refreshBonusClaims) {
+    refreshBonusClaims.addEventListener('click', () => {
+      loadPendingBonusClaims();
+      loadOverview();
+    });
+  }
 }
+
+// Load pending bonus claims
+async function loadPendingBonusClaims() {
+  try {
+    const container = document.getElementById('bonusClaimsList');
+    container.innerHTML = '<p class="loading-text">Loading bonus claims...</p>';
+
+    const data = await api.getPendingBonusClaims(currentBonusClaimsPage, 20);
+
+    if (data.claims.length === 0) {
+      container.innerHTML = '<p class="empty-state">No pending bonus claims</p>';
+      return;
+    }
+
+    container.innerHTML = data.claims.map(claim => `
+      <div class="request-card-compact">
+        <div class="request-row">
+          <div class="request-left">
+            <p class="request-user-name">${escapeHtml(claim.userName || claim.userEmail.split('@')[0])} • ${escapeHtml(claim.userEmail)}</p>
+            <p class="request-date">${formatDate(claim.createdAt)}</p>
+            <p class="request-details-text">🎁 Referral bonus from: ${escapeHtml(claim.referredUserName || 'Anonymous')}</p>
+          </div>
+          <div class="request-center">
+            <p class="request-amount-compact">${formatAmount(claim.amount)}</p>
+          </div>
+          <div class="request-right">
+            <button class="btn btn-success btn-compact" onclick="approveBonusClaim('${escapeHtml(claim.id)}')">
+              ✓ Approve
+            </button>
+            <button class="btn btn-danger btn-compact" onclick="rejectBonusClaim('${escapeHtml(claim.id)}')">
+              ✗ Reject
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  } catch (error) {
+    console.error('Error loading bonus claims:', error);
+    document.getElementById('bonusClaimsList').innerHTML = '<p class="error-text">Failed to load bonus claims</p>';
+  }
+}
+
+// Approve bonus claim
+window.approveBonusClaim = async function(claimId) {
+  if (!confirm('Are you sure you want to approve this bonus claim?')) return;
+
+  try {
+    await api.approveBonusClaim(claimId);
+    loadPendingBonusClaims();
+    loadOverview();
+  } catch (error) {
+    console.error('Error approving bonus claim:', error);
+  }
+};
+
+// Reject bonus claim
+window.rejectBonusClaim = async function(claimId) {
+  const reason = prompt('Enter rejection reason (optional):');
+  if (reason === null) return; // User cancelled
+
+  try {
+    await api.rejectBonusClaim(claimId, reason);
+    loadPendingBonusClaims();
+    loadOverview();
+  } catch (error) {
+    console.error('Error rejecting bonus claim:', error);
+  }
+};
 
 // Setup logout
 function setupLogout() {

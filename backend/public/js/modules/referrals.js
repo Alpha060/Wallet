@@ -1,15 +1,18 @@
 import api from '../services/api.js';
-import { showToast, formatDate, escapeHtml } from '../utils/helpers.js';
+import { showToast, formatDate, formatAmount, escapeHtml } from '../utils/helpers.js';
 
 /**
  * Referrals Module
- * Handles all referral-related functionality
+ * Handles all referral-related functionality including bonuses
  */
 export class ReferralsModule {
   constructor() {
     this.referralCode = null;
     this.referrals = [];
     this.totalReferrals = 0;
+    this.unclaimedBonuses = [];
+    this.totalUnclaimedAmount = 0;
+    this.bonusStats = null;
   }
 
   /**
@@ -17,6 +20,7 @@ export class ReferralsModule {
    */
   async init() {
     await this.loadReferralData();
+    await this.loadBonusData();
     this.setupEventListeners();
   }
 
@@ -35,7 +39,7 @@ export class ReferralsModule {
       this.referrals = referralsData.referrals;
 
       // Update UI
-      this.updateUI();
+      this.updateReferralUI();
     } catch (error) {
       console.error('Error loading referral data:', error);
       showToast('Failed to load referral data', 'error');
@@ -43,9 +47,30 @@ export class ReferralsModule {
   }
 
   /**
-   * Update UI with referral data
+   * Load bonus data
    */
-  updateUI() {
+  async loadBonusData() {
+    try {
+      // Load unclaimed bonuses
+      const unclaimedData = await api.getUnclaimedBonuses();
+      this.unclaimedBonuses = unclaimedData.bonuses;
+      this.totalUnclaimedAmount = unclaimedData.totalAmount;
+
+      // Load bonus stats
+      this.bonusStats = await api.getBonusStats();
+
+      // Update UI
+      this.updateBonusUI();
+    } catch (error) {
+      console.error('Error loading bonus data:', error);
+      // Don't show error toast - bonuses might not be available yet
+    }
+  }
+
+  /**
+   * Update referral UI
+   */
+  updateReferralUI() {
     // Update referral code display
     const referralCodeText = document.getElementById('referralCodeText');
     if (referralCodeText) {
@@ -60,6 +85,28 @@ export class ReferralsModule {
 
     // Update referrals list
     this.renderReferralsList();
+  }
+
+  /**
+   * Update bonus UI
+   */
+  updateBonusUI() {
+    // Update claimable amount
+    const claimableAmount = document.getElementById('claimableAmount');
+    if (claimableAmount) {
+      claimableAmount.textContent = formatAmount(this.totalUnclaimedAmount);
+    }
+
+    // Update bonus stats
+    if (this.bonusStats) {
+      const totalEarned = document.getElementById('totalBonusEarned');
+      if (totalEarned) {
+        totalEarned.textContent = formatAmount(this.bonusStats.claimedAmount + this.bonusStats.unclaimedAmount);
+      }
+    }
+
+    // Render unclaimed bonuses
+    this.renderUnclaimedBonuses();
   }
 
   /**
@@ -96,6 +143,80 @@ export class ReferralsModule {
         </div>
       </div>
     `).join('');
+  }
+
+  /**
+   * Render unclaimed bonuses
+   */
+  renderUnclaimedBonuses() {
+    const bonusesList = document.getElementById('unclaimedBonusesList');
+    if (!bonusesList) return;
+
+    if (this.unclaimedBonuses.length === 0) {
+      bonusesList.innerHTML = `
+        <div class="empty-bonuses">
+          <div class="empty-bonuses-icon">🎁</div>
+          <p>No unclaimed bonuses</p>
+          <p style="margin-top: 0.5rem; font-size: 0.875rem;">Earn 5% bonus when your referrals deposit!</p>
+        </div>
+      `;
+      return;
+    }
+
+    bonusesList.innerHTML = this.unclaimedBonuses.map(bonus => `
+      <div class="bonus-item" data-bonus-id="${bonus.id}">
+        <div class="bonus-info">
+          <div class="bonus-avatar">
+            ${this.getInitials(bonus.referredUserName)}
+          </div>
+          <div class="bonus-details">
+            <h4>${escapeHtml(bonus.referredUserName)}</h4>
+            <p>Deposited ${formatAmount(bonus.depositAmount)}</p>
+            <p class="bonus-date">${formatDate(bonus.createdAt)}</p>
+          </div>
+        </div>
+        <div class="bonus-amount-section">
+          <p class="bonus-amount">${formatAmount(bonus.bonusAmount)}</p>
+          <button class="btn btn-primary btn-sm claim-bonus-btn" data-bonus-id="${bonus.id}">
+            Claim
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    // Add click handlers for claim buttons
+    bonusesList.querySelectorAll('.claim-bonus-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const bonusId = e.target.dataset.bonusId;
+        this.claimBonus(bonusId);
+      });
+    });
+  }
+
+  /**
+   * Claim a bonus
+   */
+  async claimBonus(bonusId) {
+    try {
+      const btn = document.querySelector(`.claim-bonus-btn[data-bonus-id="${bonusId}"]`);
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Claiming...';
+      }
+
+      await api.claimBonus(bonusId);
+
+      // Reload bonus data
+      await this.loadBonusData();
+    } catch (error) {
+      console.error('Error claiming bonus:', error);
+      // Re-enable button on error
+      const btn = document.querySelector(`.claim-bonus-btn[data-bonus-id="${bonusId}"]`);
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Claim';
+      }
+    }
   }
 
   /**

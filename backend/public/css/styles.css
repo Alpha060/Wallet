@@ -417,6 +417,10 @@ body {
   background: #f8d7da;
 }
 
+.icon-bonus {
+  background: #fef3c7;
+}
+
 .transaction-details,
 .history-details {
   flex: 1;

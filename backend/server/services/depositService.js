@@ -4,6 +4,7 @@ import imageValidator from './imageValidator.js';
 import { getFileUrl } from '../middleware/uploadMiddleware.js';
 import { optimizePaymentProof } from './imageOptimizer.js';
 import pool from '../database/db.js';
+import referralBonusService from './referralBonusService.js';
 
 /**
  * DepositService handles deposit request operations
@@ -104,6 +105,14 @@ class DepositService {
         adminId,
         null
       );
+
+      // Create referral bonus if user was referred
+      try {
+        await referralBonusService.createBonusForDeposit(deposit.userId, depositId, deposit.amount);
+      } catch (bonusError) {
+        console.error('Error creating referral bonus:', bonusError);
+        // Don't fail the deposit approval if bonus creation fails
+      }
 
       await client.query('COMMIT');
 

@@ -709,6 +709,141 @@ class ApiService {
       throw this.handleError(error, 'Failed to fetch referral stats');
     }
   }
+
+  // Referral Bonus APIs
+  async getUnclaimedBonuses() {
+    try {
+      const response = await fetch('/api/referral-bonus/unclaimed', {
+        headers: AuthUtils.getAuthHeaders()
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw data;
+      }
+
+      return data;
+    } catch (error) {
+      throw this.handleError(error, 'Failed to fetch unclaimed bonuses');
+    }
+  }
+
+  async getBonusStats() {
+    try {
+      const response = await fetch('/api/referral-bonus/stats', {
+        headers: AuthUtils.getAuthHeaders()
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw data;
+      }
+
+      return data;
+    } catch (error) {
+      throw this.handleError(error, 'Failed to fetch bonus statistics');
+    }
+  }
+
+  async claimBonus(bonusId) {
+    try {
+      const response = await fetch(`/api/referral-bonus/claim/${bonusId}`, {
+        method: 'POST',
+        headers: AuthUtils.getAuthHeaders()
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw data;
+      }
+
+      showToast('Claim request submitted successfully', 'success');
+      return data;
+    } catch (error) {
+      throw this.handleError(error, 'Failed to claim bonus');
+    }
+  }
+
+  async getClaimHistory(page = 1, limit = 20) {
+    try {
+      const response = await fetch(`/api/referral-bonus/claim-history?page=${page}&limit=${limit}`, {
+        headers: AuthUtils.getAuthHeaders()
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw data;
+      }
+
+      return data;
+    } catch (error) {
+      throw this.handleError(error, 'Failed to fetch claim history');
+    }
+  }
+
+  // Admin Bonus Claim APIs
+  async getPendingBonusClaims(page = 1, limit = 20) {
+    try {
+      const response = await fetch(`/api/referral-bonus/admin/pending?page=${page}&limit=${limit}`, {
+        headers: AuthUtils.getAuthHeaders()
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw data;
+      }
+
+      return data;
+    } catch (error) {
+      throw this.handleError(error, 'Failed to fetch pending bonus claims');
+    }
+  }
+
+  async approveBonusClaim(claimId) {
+    try {
+      const response = await fetch(`/api/referral-bonus/admin/claims/${claimId}/approve`, {
+        method: 'POST',
+        headers: AuthUtils.getAuthHeaders()
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw data;
+      }
+
+      showToast('Bonus claim approved successfully', 'success');
+      return data;
+    } catch (error) {
+      throw this.handleError(error, 'Failed to approve bonus claim');
+    }
+  }
+
+  async rejectBonusClaim(claimId, reason) {
+    try {
+      const response = await fetch(`/api/referral-bonus/admin/claims/${claimId}/reject`, {
+        method: 'POST',
+        headers: AuthUtils.getAuthHeaders(),
+        body: JSON.stringify({ reason })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw data;
+      }
+
+      showToast('Bonus claim rejected', 'success');
+      return data;
+    } catch (error) {
+      throw this.handleError(error, 'Failed to reject bonus claim');
+    }
+  }
 }
 
 export default new ApiService();

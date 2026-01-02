@@ -9,6 +9,7 @@ import depositRoutes from './routes/depositRoutes.js';
 import walletRoutes from './routes/walletRoutes.js';
 import withdrawalRoutes from './routes/withdrawalRoutes.js';
 import referralRoutes from './routes/referralRoutes.js';
+import referralBonusRoutes from './routes/referralBonusRoutes.js';
 import { generalLimiter } from './middleware/rateLimitMiddleware.js';
 import runMigrations from './database/migrate.js';
 
@@ -109,6 +110,7 @@ app.use('/api/deposits', depositRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/referrals', referralRoutes);
+app.use('/api/referral-bonus', referralBonusRoutes);
 
 // Serve index.html for all non-API routes (SPA support) - MUST be last
 app.get('*', (req, res) => {
