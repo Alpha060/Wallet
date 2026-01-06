@@ -146,7 +146,7 @@ async function startServer() {
       console.log(`Server running on port ${PORT}`);
       console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`Local: http://localhost:${PORT}`);
-      console.log(`Network: http://192.168.1.17:${PORT}`);
+      console.log(`Network: http://192.168.1.21:${PORT}`);
       console.log(`\nTo access from phone/tablet, use the Network URL`);
     });
   } catch (error) {

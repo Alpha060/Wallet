@@ -780,11 +780,33 @@ router.get('/users/:id/transactions', authenticate, requireAdmin, async (req, re
       ORDER BY w.created_at DESC
     `, [userId]);
 
+    // Get bonus claims
+    const bonusClaimsResult = await pool.query(`
+      SELECT 
+        bc.id::text,
+        bc.amount,
+        bc.status,
+        bc.created_at as "createdAt",
+        bc.processed_at as "processedAt",
+        u.name as "referredUserName",
+        u.email as "referredUserEmail"
+      FROM bonus_claim_requests bc
+      LEFT JOIN referral_bonuses rb ON bc.bonus_id = rb.id
+      LEFT JOIN users u ON rb.referred_user_id = u.id
+      WHERE bc.user_id = $1
+      ORDER BY bc.created_at DESC
+    `, [userId]);
+
     // Combine and sort
     const deposits = depositsResult.rows.map(d => ({ ...d, type: 'deposit' }));
     const withdrawals = withdrawalsResult.rows.map(w => ({ ...w, type: 'withdrawal' }));
+    const bonusClaims = bonusClaimsResult.rows.map(b => ({ 
+      ...b, 
+      type: 'bonus',
+      referredUserName: b.referredUserName || b.referredUserEmail?.split('@')[0] || 'Referral'
+    }));
     
-    const allTransactions = [...deposits, ...withdrawals]
+    const allTransactions = [...deposits, ...withdrawals, ...bonusClaims]
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     const totalCount = allTransactions.length;

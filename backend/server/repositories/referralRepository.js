@@ -44,22 +44,32 @@ class ReferralRepository {
   /**
    * Get list of users referred by a specific user
    * @param {string} userId - User ID (UUID)
-   * @returns {Promise<Array>} Array of referred users
+   * @returns {Promise<Array>} Array of referred users with deposit status
    */
   async getReferredUsers(userId) {
     const query = `
       SELECT 
-        id,
-        email,
-        name,
-        created_at as "createdAt"
-      FROM users
-      WHERE referred_by = $1
-      ORDER BY created_at DESC
+        u.id,
+        u.email,
+        u.name,
+        u.created_at as "createdAt",
+        (
+          SELECT COUNT(*) > 0 FROM deposit_requests d 
+          WHERE d.user_id = u.id AND d.status = 'approved'
+        ) as "hasDeposited"
+      FROM users u
+      WHERE u.referred_by = $1
+      ORDER BY u.created_at DESC
     `;
     
     const result = await pool.query(query, [userId]);
-    return result.rows;
+    console.log('[ReferralRepository] getReferredUsers raw result:', JSON.stringify(result.rows, null, 2));
+    
+    // Ensure hasDeposited is a proper boolean
+    return result.rows.map(row => ({
+      ...row,
+      hasDeposited: row.hasDeposited === true || row.hasDeposited === 't' || row.hasDeposited === 'true' || row.hasDeposited === '1'
+    }));
   }
 
   /**

@@ -52,20 +52,24 @@ function setupThemeToggle() {
   const desktopThemeToggle = document.getElementById('desktopThemeToggle');
   const desktopThemeIcon = document.getElementById('desktopThemeIcon');
   
+  // SVG icons for theme toggle
+  const moonIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+  const sunIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
+  
   // Set initial icons
   const currentTheme = ThemeManager.getCurrentTheme();
-  const iconText = currentTheme === 'dark' ? '☀️' : '🌙';
+  const iconHtml = currentTheme === 'dark' ? sunIcon : moonIcon;
   
-  if (themeIcon) themeIcon.textContent = iconText;
-  if (desktopThemeIcon) desktopThemeIcon.textContent = iconText;
+  if (themeIcon) themeIcon.innerHTML = iconHtml;
+  if (desktopThemeIcon) desktopThemeIcon.innerHTML = iconHtml;
   
   // Mobile theme toggle handler
   if (themeToggle) {
     themeToggle.addEventListener('click', () => {
       const newTheme = ThemeManager.toggleTheme();
-      const newIconText = newTheme === 'dark' ? '☀️' : '🌙';
-      if (themeIcon) themeIcon.textContent = newIconText;
-      if (desktopThemeIcon) desktopThemeIcon.textContent = newIconText;
+      const newIconHtml = newTheme === 'dark' ? sunIcon : moonIcon;
+      if (themeIcon) themeIcon.innerHTML = newIconHtml;
+      if (desktopThemeIcon) desktopThemeIcon.innerHTML = newIconHtml;
     });
   }
   
@@ -73,9 +77,9 @@ function setupThemeToggle() {
   if (desktopThemeToggle) {
     desktopThemeToggle.addEventListener('click', () => {
       const newTheme = ThemeManager.toggleTheme();
-      const newIconText = newTheme === 'dark' ? '☀️' : '🌙';
-      if (themeIcon) themeIcon.textContent = newIconText;
-      if (desktopThemeIcon) desktopThemeIcon.textContent = newIconText;
+      const newIconHtml = newTheme === 'dark' ? sunIcon : moonIcon;
+      if (themeIcon) themeIcon.innerHTML = newIconHtml;
+      if (desktopThemeIcon) desktopThemeIcon.innerHTML = newIconHtml;
     });
   }
 }
@@ -220,9 +224,33 @@ async function loadOverview() {
     // Load balance
     await loadBalance();
 
-    // Load recent transactions
+    // Load recent transactions (deposits, withdrawals, and bonuses)
     const transactionsData = await api.getTransactions(1, 10);
-    displayRecentTransactions(transactionsData.transactions);
+    let allRecentTransactions = transactionsData.transactions.map(tx => ({
+      ...tx,
+      type: tx.type || (tx.amount > 0 ? 'deposit' : 'withdrawal')
+    }));
+
+    // Also fetch recent bonus claims
+    try {
+      const claimsData = await api.getClaimHistory(1, 10);
+      const bonusTransactions = claimsData.claims
+        .filter(c => c.status === 'approved')
+        .map(c => ({
+          ...c,
+          type: 'bonus',
+          createdAt: c.createdAt
+        }));
+      allRecentTransactions = [...allRecentTransactions, ...bonusTransactions];
+    } catch (e) {
+      console.log('Bonus claims not available');
+    }
+
+    // Sort by date and take top 10
+    allRecentTransactions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    allRecentTransactions = allRecentTransactions.slice(0, 10);
+
+    displayRecentTransactions(allRecentTransactions);
 
     // Calculate totals
     const depositsData = await api.getMyDeposits(1, 100);
@@ -252,23 +280,52 @@ function displayRecentTransactions(transactions) {
     return;
   }
 
-  container.innerHTML = transactions.map(tx => `
-    <div class="transaction-item">
-      <div class="transaction-icon ${tx.type === 'deposit' ? 'icon-deposit' : 'icon-withdrawal'}">
-        ${tx.type === 'deposit' ? '📥' : '📤'}
+  // SVG icons matching stat cards
+  const depositIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"></path><path d="m6 15 6 6 6-6"></path></svg>';
+  const withdrawalIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V3"></path><path d="m6 9 6-6 6 6"></path></svg>';
+  const bonusIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"></path><path d="M2 7h20v5H2z"></path><path d="M12 22V7"></path><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>';
+
+  container.innerHTML = transactions.map(tx => {
+    let icon, iconClass, title, amountClass, amountPrefix;
+    
+    if (tx.type === 'deposit') {
+      icon = depositIcon;
+      iconClass = 'icon-deposit';
+      title = 'Deposit';
+      amountClass = 'amount-positive';
+      amountPrefix = '+';
+    } else if (tx.type === 'withdrawal') {
+      icon = withdrawalIcon;
+      iconClass = 'icon-withdrawal';
+      title = 'Withdrawal';
+      amountClass = 'amount-negative';
+      amountPrefix = '-';
+    } else if (tx.type === 'bonus') {
+      icon = bonusIcon;
+      iconClass = 'icon-bonus';
+      title = `Bonus from ${escapeHtml(tx.referredUserName || 'Referral')}`;
+      amountClass = 'amount-positive';
+      amountPrefix = '+';
+    }
+    
+    return `
+      <div class="transaction-item">
+        <div class="transaction-icon ${iconClass}">
+          ${icon}
+        </div>
+        <div class="transaction-details">
+          <h4>${title}</h4>
+          <p class="transaction-date">${formatDate(tx.createdAt)}</p>
+        </div>
+        <div class="transaction-amount">
+          <p class="amount ${amountClass}">
+            ${amountPrefix}${formatAmount(tx.amount)}
+          </p>
+          <span class="status-badge ${getStatusClass(tx.status)}">${escapeHtml(tx.status)}</span>
+        </div>
       </div>
-      <div class="transaction-details">
-        <h4>${tx.type === 'deposit' ? 'Deposit' : 'Withdrawal'}</h4>
-        <p class="transaction-date">${formatDate(tx.createdAt)}</p>
-      </div>
-      <div class="transaction-amount">
-        <p class="amount ${tx.type === 'deposit' ? 'amount-positive' : 'amount-negative'}">
-          ${tx.type === 'deposit' ? '+' : '-'}${formatAmount(tx.amount)}
-        </p>
-        <span class="status-badge ${getStatusClass(tx.status)}">${escapeHtml(tx.status)}</span>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 // Setup navigation
@@ -355,6 +412,8 @@ function switchView(view) {
         maxWithdrawAmount.textContent = formatAmount(currentBalance);
       }
     });
+    // Auto-fill saved payment details
+    loadSavedPaymentDetailsForWithdraw();
   } else if (view === 'history') {
     loadHistory();
   } else if (view === 'referrals') {
@@ -375,51 +434,63 @@ function setupPaymentDetailsModal() {
     viewPaymentBtn.addEventListener('click', async (e) => {
       e.preventDefault();
       
-      // Load payment details into modal
+      // 1. Validate Amount First
+      const amountInput = document.getElementById('depositAmount');
+      const amount = amountInput ? amountInput.value : '';
+
+      if (!amount || parseFloat(amount) <= 0) {
+        showToast('Please enter a valid amount first to generate QR', 'error');
+        if(amountInput) amountInput.focus();
+        return;
+      }
+
+      // Show loading while fetching details
+      const modalContent = document.getElementById('paymentDetailsModalContent');
+      modalContent.innerHTML = '<p class="loading-text">Generating Payment QR...</p>';
+      modal.classList.add('active');
+
       try {
         const data = await api.getPaymentDetails();
-        const modalContent = document.getElementById('paymentDetailsModalContent');
         
-        if (data.qrCodeUrl) {
-          const qrUrlWithCacheBust = data.qrCodeUrl + '?t=' + new Date().getTime();
+        if (data.upiId) {
+          // 2. Create the Magic UPI Link
+          // pa = Payee Address, pn = Payee Name, am = Amount, cu = Currency
+          const upiDeepLink = `upi://pay?pa=${data.upiId}&pn=${encodeURIComponent(data.adminName || 'Merchant')}&am=${amount}&cu=INR`;
+          
+          // 3. Generate Dynamic QR Code (Using a free public API for simplicity)
+          const dynamicQrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(upiDeepLink)}&size=250&ecLevel=M`;
           
           modalContent.innerHTML = `
-            <img src="${escapeHtml(qrUrlWithCacheBust)}" alt="Payment QR Code" class="payment-qr-code" 
-                 onerror="console.error('Failed to load QR code:', this.src); this.style.display='none';"
-                 onload="console.log('QR code loaded successfully');">
-            ${data.adminName ? `
-              <p class="admin-name-display">Pay to: <strong>${escapeHtml(data.adminName)}</strong></p>
-            ` : ''}
-            ${data.upiId ? `
-              <div class="upi-id-container">
-                <p class="upi-id">${escapeHtml(data.upiId)}</p>
+            <div class="qr-container" style="text-align: center;">
+              <h3 style="margin-bottom: 10px; color: #333;">Pay ₹${amount}</h3>
+              
+              <img src="${dynamicQrUrl}" alt="Scan to Pay" class="payment-qr-code" 
+                   style="width: 200px; height: 200px; border: 2px solid #eee; padding: 10px; border-radius: 8px;">
+              
+              <p class="admin-name-display" style="margin-top: 10px;">Paying to: <strong>${escapeHtml(data.adminName || data.upiId)}</strong></p>
+              
+              <div style="margin-top: 20px;">
+                <a href="${upiDeepLink}" class="btn btn-primary" style="width: 100%; text-decoration: none; display: inline-block; text-align: center;">
+                  <span class="btn-icon">⚡</span> Pay via UPI App
+                </a>
+              </div>
+
+              <div class="upi-id-container" style="margin-top: 15px; font-size: 0.9em; color: #666;">
+                <p>UPI ID: ${escapeHtml(data.upiId)}</p>
                 <button type="button" class="copy-upi-btn" onclick="copyUpiId('${escapeHtml(data.upiId)}')">
-                  📋 Copy
+                  Copy
                 </button>
               </div>
-            ` : ''}
-          `;
-        } else if (data.upiId) {
-          modalContent.innerHTML = `
-            ${data.adminName ? `
-              <p class="admin-name-display">Pay to: <strong>${escapeHtml(data.adminName)}</strong></p>
-            ` : ''}
-            <div class="upi-id-container">
-              <p class="upi-id">${escapeHtml(data.upiId)}</p>
-              <button type="button" class="copy-upi-btn" onclick="copyUpiId('${escapeHtml(data.upiId)}')">
-                📋 Copy
-              </button>
             </div>
           `;
         } else {
-          modalContent.innerHTML = '<p class="error-text">Payment details not available</p>';
+          // Fallback if Admin hasn't set a UPI ID text (only image)
+          modalContent.innerHTML = '<p class="error-text">Admin has not set a valid UPI ID for automatic generation. Please ask admin to update settings.</p>';
         }
         
-        // Show modal
-        modal.classList.add('active');
       } catch (error) {
         console.error('Error loading payment details:', error);
-        showToast('Failed to load payment details', 'error');
+        modalContent.innerHTML = '<p class="error-text">Failed to load payment details</p>';
       }
     });
   }
@@ -828,8 +899,6 @@ function setupWithdrawForm() {
     try {
       await api.createWithdrawal(amountInPaise, bankDetailsObj);
       
-      showToast('Withdrawal request submitted successfully', 'success');
-      
       // Reset form
       form.reset();
       amountInput.value = '500';
@@ -845,8 +914,8 @@ function setupWithdrawForm() {
       switchView('overview');
       loadOverview();
     } catch (error) {
-      console.error('Error creating withdrawal:', error);
-    }
+        console.error('Error creating withdrawal:', error);
+      }
   }
 }
 
@@ -1049,6 +1118,50 @@ function setupSettings() {
       hideLoading(submitBtn);
     }
   });
+
+  // Payment method form
+  const paymentMethodForm = document.getElementById('paymentMethodForm');
+  if (paymentMethodForm) {
+    paymentMethodForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const submitBtn = paymentMethodForm.querySelector('button[type="submit"]');
+      const upiId = document.getElementById('savedUpiId').value.trim();
+      const accountName = document.getElementById('savedAccountName').value.trim();
+      const accountNumber = document.getElementById('savedAccountNumber').value.trim();
+      const ifscCode = document.getElementById('savedIfscCode').value.trim().toUpperCase();
+
+      // Validate UPI ID format if provided
+      if (upiId && !/^[\w.-]+@[\w]+$/.test(upiId)) {
+        showToast('Please enter a valid UPI ID (e.g., name@upi)', 'error');
+        return;
+      }
+
+      // Validate IFSC if bank details provided
+      if ((accountName || accountNumber || ifscCode) && ifscCode) {
+        if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifscCode)) {
+          showToast('Please enter a valid IFSC code', 'error');
+          return;
+        }
+      }
+
+      // Build bank details object if any bank field is filled
+      let bankDetails = null;
+      if (accountName && accountNumber && ifscCode) {
+        bankDetails = { accountName, accountNumber, ifscCode };
+      }
+
+      showLoading(submitBtn);
+
+      try {
+        await api.updateSavedPaymentDetails(upiId || null, bankDetails);
+      } catch (error) {
+        console.error('Error saving payment details:', error);
+      } finally {
+        hideLoading(submitBtn);
+      }
+    });
+  }
 }
 
 // Load settings
@@ -1066,9 +1179,141 @@ async function loadSettings() {
       document.getElementById('profileAadhar').value = user.aadharNumber || '';
       document.getElementById('profilePAN').value = user.panNumber || '';
     }
+
+    // Load saved payment details
+    try {
+      const paymentDetails = await api.getSavedPaymentDetails();
+      
+      if (document.getElementById('savedUpiId')) {
+        document.getElementById('savedUpiId').value = paymentDetails.savedUpiId || '';
+      }
+      
+      if (paymentDetails.savedBankDetails) {
+        if (document.getElementById('savedAccountName')) {
+          document.getElementById('savedAccountName').value = paymentDetails.savedBankDetails.accountName || '';
+        }
+        if (document.getElementById('savedAccountNumber')) {
+          document.getElementById('savedAccountNumber').value = paymentDetails.savedBankDetails.accountNumber || '';
+        }
+        if (document.getElementById('savedIfscCode')) {
+          document.getElementById('savedIfscCode').value = paymentDetails.savedBankDetails.ifscCode || '';
+        }
+      }
+    } catch (err) {
+      console.log('No saved payment details found');
+    }
   } catch (error) {
     console.error('Error loading settings:', error);
   }
+}
+
+// Load saved payment details for withdrawal form auto-fill
+async function loadSavedPaymentDetailsForWithdraw() {
+  try {
+    const paymentDetails = await api.getSavedPaymentDetails();
+    
+    // Auto-fill UPI ID and make read-only if saved
+    const upiIdField = document.getElementById('upiId');
+    if (upiIdField) {
+      if (paymentDetails.savedUpiId) {
+        upiIdField.value = paymentDetails.savedUpiId;
+        upiIdField.readOnly = true;
+        upiIdField.classList.add('readonly-field');
+        // Add hint to go to settings
+        addSettingsHint(upiIdField, 'upi');
+      } else {
+        upiIdField.readOnly = false;
+        upiIdField.classList.remove('readonly-field');
+        removeSettingsHint(upiIdField);
+      }
+    }
+    
+    // Auto-fill Bank Details and make read-only if saved
+    const accountNameField = document.getElementById('accountName');
+    const accountNumberField = document.getElementById('accountNumber');
+    const ifscCodeField = document.getElementById('ifscCode');
+    
+    if (paymentDetails.savedBankDetails) {
+      const bankFields = [accountNameField, accountNumberField, ifscCodeField];
+      
+      if (accountNameField && paymentDetails.savedBankDetails.accountName) {
+        accountNameField.value = paymentDetails.savedBankDetails.accountName;
+        accountNameField.readOnly = true;
+        accountNameField.classList.add('readonly-field');
+      }
+      if (accountNumberField && paymentDetails.savedBankDetails.accountNumber) {
+        accountNumberField.value = paymentDetails.savedBankDetails.accountNumber;
+        accountNumberField.readOnly = true;
+        accountNumberField.classList.add('readonly-field');
+      }
+      if (ifscCodeField && paymentDetails.savedBankDetails.ifscCode) {
+        ifscCodeField.value = paymentDetails.savedBankDetails.ifscCode;
+        ifscCodeField.readOnly = true;
+        ifscCodeField.classList.add('readonly-field');
+      }
+      // Add hint to last bank field
+      if (ifscCodeField) addSettingsHint(ifscCodeField, 'bank');
+    } else {
+      // Make fields editable if no saved details
+      [accountNameField, accountNumberField, ifscCodeField].forEach(field => {
+        if (field) {
+          field.readOnly = false;
+          field.classList.remove('readonly-field');
+        }
+      });
+      if (ifscCodeField) removeSettingsHint(ifscCodeField);
+    }
+    
+    // Select preferred payment method if set
+    if (paymentDetails.preferredPaymentMethod) {
+      const methodRadio = document.querySelector(`input[name="withdrawMethod"][value="${paymentDetails.preferredPaymentMethod}"]`);
+      if (methodRadio) {
+        methodRadio.checked = true;
+        // Trigger the payment method update to show correct fields
+        const event = new Event('change');
+        methodRadio.dispatchEvent(event);
+      }
+    }
+  } catch (err) {
+    console.log('No saved payment details to auto-fill');
+  }
+}
+
+// Add settings hint below field
+function addSettingsHint(field, type) {
+  const hintId = `${type}SettingsHint`;
+  if (document.getElementById(hintId)) return; // Already exists
+  
+  const hint = document.createElement('small');
+  hint.id = hintId;
+  hint.className = 'form-hint settings-hint';
+  hint.innerHTML = '<a href="#" class="go-to-payment-settings">Change in Settings →</a>';
+  
+  // Add click handler
+  hint.querySelector('a').addEventListener('click', (e) => {
+    e.preventDefault();
+    goToPaymentSettings();
+  });
+  
+  field.parentElement.appendChild(hint);
+}
+
+// Remove settings hint
+function removeSettingsHint(field) {
+  const hints = field.parentElement.querySelectorAll('.settings-hint');
+  hints.forEach(h => h.remove());
+}
+
+// Navigate to payment settings
+function goToPaymentSettings() {
+  switchView('settings');
+  // Wait for view to switch, then click payment tab
+  setTimeout(() => {
+    const paymentTab = document.querySelector('.settings-tab[data-tab="payment"]');
+    if (paymentTab) {
+      paymentTab.click();
+    }
+  }, 100);
 }
 
 // Setup history view
@@ -1219,20 +1464,25 @@ async function loadHistory() {
       // Determine icon and styling based on type
       let icon, iconClass, title, amountClass, amountPrefix;
       
+      // SVG icons matching home page stat cards
+      const depositIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"></path><path d="m6 15 6 6 6-6"></path></svg>';
+      const withdrawalIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V3"></path><path d="m6 9 6-6 6 6"></path></svg>';
+      const bonusIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"></path><path d="M2 7h20v5H2z"></path><path d="M12 22V7"></path><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>';
+      
       if (tx.type === 'deposit') {
-        icon = '📥';
+        icon = depositIcon;
         iconClass = 'icon-deposit';
         title = 'Deposit';
         amountClass = 'amount-positive';
         amountPrefix = '+';
       } else if (tx.type === 'withdrawal') {
-        icon = '📤';
+        icon = withdrawalIcon;
         iconClass = 'icon-withdrawal';
         title = 'Withdrawal';
         amountClass = 'amount-negative';
         amountPrefix = '-';
       } else if (tx.type === 'bonus') {
-        icon = '🎁';
+        icon = bonusIcon;
         iconClass = 'icon-bonus';
         title = `Bonus from ${escapeHtml(tx.referredUserName || 'Referral')}`;
         amountClass = 'amount-positive';

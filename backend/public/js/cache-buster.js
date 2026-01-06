@@ -2,47 +2,44 @@
 (function() {
   'use strict';
   
-  const VERSION = '1.0.6'; // Update this when you want to force cache refresh
+  // UPDATE THIS VERSION whenever you deploy changes!
+  const VERSION = '2.0.0';
   
-  // Add version parameter to dynamic imports and script loads
-  function addVersionToUrl(url) {
-    const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}v=${VERSION}`;
-  }
+  // Store version
+  const storedVersion = localStorage.getItem('app-version');
   
-  // Override fetch to add version to certain requests
-  const originalFetch = window.fetch;
-  window.fetch = function(resource, options = {}) {
-    if (typeof resource === 'string') {
-      // Add version to JS, CSS, and HTML files
-      if (resource.match(/\.(js|css|html)$/)) {
-        resource = addVersionToUrl(resource);
-      }
-    }
-    return originalFetch.call(this, resource, options);
-  };
-  
-  // Force service worker update on version change
-  if ('serviceWorker' in navigator) {
-    const storedVersion = localStorage.getItem('app-version');
-    if (storedVersion && storedVersion !== VERSION) {
-      console.log('New version detected, updating service worker...');
-      navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for(let registration of registrations) {
-          registration.update();
-        }
+  // Check if version changed
+  if (storedVersion && storedVersion !== VERSION) {
+    console.log(`[Cache] Version changed: ${storedVersion} -> ${VERSION}`);
+    
+    // Clear all caches
+    if ('caches' in window) {
+      caches.keys().then((names) => {
+        names.forEach(name => {
+          console.log('[Cache] Deleting cache:', name);
+          caches.delete(name);
+        });
       });
-      // Clear caches
-      if ('caches' in window) {
-        caches.keys().then(function(names) {
-          for (let name of names) {
-            caches.delete(name);
+    }
+    
+    // Clear localStorage cache markers
+    localStorage.removeItem('sw-cache-version');
+    
+    // Update service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach(registration => {
+          registration.update();
+          if (registration.waiting) {
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
           }
         });
-      }
+      });
     }
-    localStorage.setItem('app-version', VERSION);
   }
   
-  console.log(`App version: ${VERSION}`);
+  // Save current version
+  localStorage.setItem('app-version', VERSION);
+  
+  console.log(`[App] Version: ${VERSION}`);
 })();

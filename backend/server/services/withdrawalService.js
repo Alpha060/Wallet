@@ -68,6 +68,21 @@ class WithdrawalService {
         throw new Error('Minimum withdrawal amount is ₹1 (100 paise)');
       }
 
+      const referralCheckQuery = `
+        SELECT COUNT(DISTINCT u.id) as count
+        FROM users u
+        JOIN deposit_requests d ON u.id = d.user_id
+        WHERE u.referred_by = $1 AND d.status = 'approved'
+      `;
+      const refResult = await client.query(referralCheckQuery, [userId]);
+      const confirmedReferrals = parseInt(refResult.rows[0].count);
+      const REQUIRED_REFERRALS = 5;
+
+      if (confirmedReferrals < REQUIRED_REFERRALS) {
+        const needed = REQUIRED_REFERRALS - confirmedReferrals;
+        throw new Error(`Requirement not met: You need ${needed} more confirmed referral${needed > 1 ? 's' : ''} to withdraw.`);
+      }
+
       // Validate bank details
       this.validateBankDetails(bankDetails);
 

@@ -61,6 +61,16 @@ router.post('/create', authenticate, withdrawalLimiter, async (req, res) => {
   } catch (error) {
     console.error('Create withdrawal error:', error);
 
+    // --- NEW: Handle Referral Requirement Error ---
+    if (error.message.includes('Requirement not met')) {
+      // Send 403 (Forbidden) with the clean message string
+      // The frontend will grab this 'error' string and show it in the toast
+      return res.status(403).json({
+        error: error.message
+      });
+    }
+    // ----------------------------------------------
+
     if (error.message === 'Insufficient balance') {
       return res.status(422).json({
         error: {

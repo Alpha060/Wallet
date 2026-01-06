@@ -18,11 +18,20 @@ class ApiService {
       return error.error.message;
     }
     
+    // CASE 1: Standard error object { error: { message: "..." } }
     if (error.error && error.error.message) {
       showToast(error.error.message, 'error');
       return error.error.message;
     }
+
+    // CASE 2 (NEW): Simple string error { error: "Requirement not met..." }
+    // This catches the referral error!
+    if (typeof error.error === 'string') {
+      showToast(error.error, 'error');
+      return error.error;
+    }
     
+    // Fallback
     showToast(customMessage || 'An error occurred', 'error');
     return customMessage || 'An error occurred';
   }
@@ -141,6 +150,55 @@ class ApiService {
       return data;
     } catch (error) {
       throw this.handleError(error, 'Failed to update profile');
+    }
+  }
+
+  // Payment Details APIs (saved UPI/Bank for withdrawals)
+  async getSavedPaymentDetails() {
+    try {
+      const response = await fetch('/api/auth/payment-details', {
+        headers: AuthUtils.getAuthHeaders()
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw data;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Failed to fetch saved payment details:', error);
+      return { savedUpiId: null, savedBankDetails: null, preferredPaymentMethod: 'upi' };
+    }
+  }
+
+  async updateSavedPaymentDetails(upiId, bankDetails, preferredPaymentMethod) {
+    try {
+      const body = {};
+      if (upiId !== undefined) body.upiId = upiId;
+      if (bankDetails !== undefined) body.bankDetails = bankDetails;
+      if (preferredPaymentMethod !== undefined) body.preferredPaymentMethod = preferredPaymentMethod;
+
+      const response = await fetch('/api/auth/payment-details', {
+        method: 'PUT',
+        headers: {
+          ...AuthUtils.getAuthHeaders(),
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw data;
+      }
+
+      showToast('Payment details saved successfully', 'success');
+      return data;
+    } catch (error) {
+      throw this.handleError(error, 'Failed to save payment details');
     }
   }
 

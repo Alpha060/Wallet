@@ -1,4 +1,5 @@
 import referralRepository from '../repositories/referralRepository.js';
+import pool from '../database/db.js';
 
 /**
  * ReferralService handles referral business logic
@@ -28,6 +29,24 @@ class ReferralService {
     const referrer = await referralRepository.findByReferralCode(referralCode);
     return referrer;
   }
+  
+  /**
+   * Get count of referrals who have made at least one approved deposit
+   * @param {string} userId
+   * @returns {Promise<number>}
+   */
+  async getConfirmedReferralCount(userId) {
+    const query = `
+      SELECT COUNT(DISTINCT u.id) as count
+      FROM users u
+      INNER JOIN deposit_requests d ON u.id = d.user_id
+      WHERE u.referred_by = $1 AND d.status = 'approved'
+    `;
+    const result = await pool.query(query, [userId]);
+    const count = parseInt(result.rows[0]?.count || 0, 10);
+    console.log(`[ReferralService] Confirmed referral count for user ${userId}: ${count}`);
+    return count;
+  }
 
   /**
    * Get user's referral information
@@ -38,6 +57,9 @@ class ReferralService {
     const referralCode = await referralRepository.getUserReferralCode(userId);
     const referredUsers = await referralRepository.getReferredUsers(userId);
     const stats = await referralRepository.getReferralStats(userId);
+    
+    // Get confirmed count
+    const confirmedCount = await this.getConfirmedReferralCount(userId);
 
     return {
       referralCode,
@@ -45,9 +67,11 @@ class ReferralService {
         id: user.id,
         name: user.name || 'Anonymous',
         email: user.email,
-        joinedAt: user.createdAt
+        joinedAt: user.createdAt,
+        hasDeposited: user.hasDeposited || false
       })),
-      totalReferrals: stats.totalReferrals
+      totalReferrals: stats.totalReferrals,
+      confirmedReferrals: confirmedCount
     };
   }
 
@@ -71,6 +95,8 @@ class ReferralService {
     await referralRepository.setReferrer(userId, referrer.id);
     return true;
   }
+
+
 }
 
 export default new ReferralService();

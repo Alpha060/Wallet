@@ -520,4 +520,142 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/auth/payment-details
+ * Get user's saved payment details
+ */
+router.get('/payment-details', authenticate, async (req, res) => {
+  try {
+    const user = await userRepository.findById(req.user.userId);
+
+    if (!user) {
+      return res.status(404).json({
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'User not found',
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+
+    res.status(200).json({
+      savedUpiId: user.savedUpiId || null,
+      savedBankDetails: user.savedBankDetails || null,
+      preferredPaymentMethod: user.preferredPaymentMethod || 'upi'
+    });
+  } catch (error) {
+    console.error('Get payment details error:', error);
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An error occurred while fetching payment details',
+        timestamp: new Date().toISOString()
+      }
+    });
+  }
+});
+
+/**
+ * PUT /api/auth/payment-details
+ * Update user's saved payment details
+ */
+router.put('/payment-details', authenticate, async (req, res) => {
+  try {
+    const { upiId, bankDetails, preferredPaymentMethod } = req.body;
+    const userId = req.user.userId;
+
+    const updates = {};
+
+    // Validate and update UPI ID
+    if (upiId !== undefined) {
+      if (upiId && !/^[\w.-]+@[\w]+$/.test(upiId)) {
+        return res.status(400).json({
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid UPI ID format',
+            timestamp: new Date().toISOString()
+          }
+        });
+      }
+      updates.savedUpiId = upiId || null;
+    }
+
+    // Validate and update bank details
+    if (bankDetails !== undefined) {
+      if (bankDetails) {
+        const { accountName, accountNumber, ifscCode } = bankDetails;
+        
+        if (!accountName || !accountNumber || !ifscCode) {
+          return res.status(400).json({
+            error: {
+              code: 'VALIDATION_ERROR',
+              message: 'Bank details must include accountName, accountNumber, and ifscCode',
+              timestamp: new Date().toISOString()
+            }
+          });
+        }
+
+        if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifscCode.toUpperCase())) {
+          return res.status(400).json({
+            error: {
+              code: 'VALIDATION_ERROR',
+              message: 'Invalid IFSC code format',
+              timestamp: new Date().toISOString()
+            }
+          });
+        }
+
+        updates.savedBankDetails = {
+          accountName: accountName.trim(),
+          accountNumber: accountNumber.trim(),
+          ifscCode: ifscCode.toUpperCase().trim()
+        };
+      } else {
+        updates.savedBankDetails = null;
+      }
+    }
+
+    // Validate and update preferred payment method
+    if (preferredPaymentMethod !== undefined) {
+      if (!['upi', 'bank'].includes(preferredPaymentMethod)) {
+        return res.status(400).json({
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Preferred payment method must be "upi" or "bank"',
+            timestamp: new Date().toISOString()
+          }
+        });
+      }
+      updates.preferredPaymentMethod = preferredPaymentMethod;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'No fields to update',
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+
+    // Update payment details
+    await userRepository.updatePaymentDetails(userId, updates);
+
+    res.status(200).json({
+      success: true,
+      message: 'Payment details updated successfully'
+    });
+  } catch (error) {
+    console.error('Update payment details error:', error);
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An error occurred while updating payment details',
+        timestamp: new Date().toISOString()
+      }
+    });
+  }
+});
+
 export default router;

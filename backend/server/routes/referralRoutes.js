@@ -56,9 +56,14 @@ router.get('/my-referrals', authenticate, async (req, res) => {
     }
 
     const referralInfo = await referralService.getUserReferralInfo(req.user.userId);
+    
+    console.log('[ReferralRoutes] Referred users:', JSON.stringify(referralInfo.referredUsers, null, 2));
 
     res.status(200).json({
-      referrals: referralInfo.referredUsers,
+      referrals: referralInfo.referredUsers.map(user => ({
+        ...user,
+        hasDeposited: user.hasDeposited === true
+      })),
       totalReferrals: referralInfo.totalReferrals
     });
   } catch (error) {
@@ -94,7 +99,9 @@ router.get('/stats', authenticate, async (req, res) => {
 
     res.status(200).json({
       referralCode: referralInfo.referralCode,
-      totalReferrals: referralInfo.totalReferrals
+      totalReferrals: referralInfo.totalReferrals,
+      confirmedReferrals: referralInfo.confirmedReferrals,
+      requiredReferrals: 5 // Minimum confirmed referrals needed for withdrawal
     });
   } catch (error) {
     console.error('Get referral stats error:', error);

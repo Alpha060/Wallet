@@ -1,310 +1,834 @@
-/* Referrals View Styles */
-.referrals-container {
+/* =============================================
+   REFERRALS PAGE - MODERN PROFESSIONAL DESIGN
+   ============================================= */
+
+/* Container */
+.referrals-container-v2 {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
+  padding: 0.5rem;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-.referral-code-card,
-.referral-stats-card,
-.referrals-list-card,
-.referral-bonus-card,
-.claim-history-card {
-  background: var(--color-card-bg);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-sm);
+/* =============================================
+   HERO SECTION - Referral Code
+   ============================================= */
+.referral-hero {
+  position: relative;
+  background: linear-gradient(135deg, #0066FF 0%, #0052CC 50%, #0747A6 100%);
+  border-radius: 20px;
+  padding: 1.75rem 1.5rem;
   overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 102, 255, 0.3);
 }
 
-.referral-code-display {
+.hero-glow {
+  position: absolute;
+  top: -50%;
+  right: -30%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
-  padding: 1rem 0;
+  text-align: center;
 }
 
-.code-box {
-  background: linear-gradient(135deg, #4F46E5, #3730A3);
-  padding: 2rem 3rem;
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-md);
-  width: fit-content;
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 1rem;
 }
 
-.referral-code {
-  font-size: 2.5rem;
+.badge-icon {
+  font-size: 1rem;
+}
+
+.hero-title {
+  font-size: 1.5rem;
   font-weight: 700;
-  color: #FFFFFF !important;
-  letter-spacing: 0.5rem;
-  font-family: 'Courier New', monospace;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  display: block;
-  -webkit-text-fill-color: #FFFFFF !important;
-  opacity: 1 !important;
+  color: white;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
-.referral-actions {
+.hero-subtitle {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.85);
+  margin: 0 0 1.5rem 0;
+  line-height: 1.4;
+}
+
+/* Referral Code Box */
+.referral-code-box {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  width: 100%;
+  max-width: 280px;
+  margin-bottom: 1rem;
+}
+
+.code-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.code-display {
   display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.code-text {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: 4px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  text-align: center;
+}
+
+.copy-btn {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
   justify-content: center;
 }
 
-.referral-info {
-  text-align: center;
-  color: var(--color-text-secondary);
-  padding: 1rem;
-  background: var(--color-bg-secondary);
-  border-radius: var(--border-radius-sm);
+.copy-btn:hover {
+  background: rgba(255,255,255,0.3);
+  transform: scale(1.05);
 }
 
-.referral-stats-card .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
+.copy-btn:active {
+  transform: scale(0.95);
 }
 
-.stat-item {
+/* Share Button */
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: white;
+  color: #0066FF;
+  border: none;
+  border-radius: 12px;
+  padding: 0.875rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.share-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.share-btn:active {
+  transform: translateY(0);
+}
+
+/* =============================================
+   PROGRESS CARD - Withdrawal Eligibility
+   ============================================= */
+.progress-card {
+  background: var(--bg-card, #fff);
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.progress-header {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem;
-  background: var(--color-bg-secondary);
-  border-radius: var(--border-radius-sm);
-  position: relative;
+  margin-bottom: 1rem;
 }
 
-.stat-item .stat-icon {
+.progress-icon {
   font-size: 2rem;
-  position: static;
-  flex-shrink: 0;
+  line-height: 1;
 }
 
-.stat-details {
+.progress-info {
   flex: 1;
 }
 
-.stat-label {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-  margin-bottom: 0.25rem;
-}
-
-.stat-value {
-  font-size: 1.5rem;
+.progress-title {
+  font-size: 1rem;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--text-primary, #1f2937);
+  margin: 0 0 0.25rem 0;
 }
 
-.referrals-list {
+.progress-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #6b7280);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.progress-bar-container {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-}
-
-.referral-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-  background: var(--color-bg-secondary);
-  border-radius: var(--border-radius-sm);
-  transition: transform 0.2s ease;
-}
-
-.referral-item:hover {
-  transform: translateX(4px);
-}
-
-.referral-user-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.referral-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--color-primary);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 1.125rem;
-}
-
-.referral-details h4 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: 0.25rem;
-}
-
-.referral-details p {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-}
-
-.referral-date {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-}
-
-.empty-referrals,
-.empty-bonuses,
-.empty-history {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: var(--color-text-secondary);
-}
-
-.empty-referrals-icon,
-.empty-bonuses-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  opacity: 0.5;
-}
-
-/* Bonus Card Styles */
-.referral-bonus-card {
-  border: 2px solid var(--color-primary);
-}
-
-.bonus-summary {
-  text-align: center;
-  padding: 1rem;
-  background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(55, 48, 163, 0.1));
-  border-radius: var(--border-radius-sm);
-  margin-bottom: 1rem;
-}
-
-.bonus-total .bonus-label {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-  margin-bottom: 0.5rem;
-}
-
-.bonus-total .bonus-value {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-.unclaimed-bonuses-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.bonus-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-  background: var(--color-bg-secondary);
-  border-radius: var(--border-radius-sm);
-  border-left: 4px solid var(--color-primary);
-}
-
-.bonus-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.bonus-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--color-success);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 1rem;
-}
-
-.bonus-details h4 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: 0.25rem;
-}
-
-.bonus-details p {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-}
-
-.bonus-date {
-  font-size: 0.75rem;
-  color: var(--color-text-tertiary);
-}
-
-.bonus-amount-section {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
   gap: 0.5rem;
 }
 
-.bonus-amount {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-success);
+.progress-bar {
+  height: 10px;
+  background: var(--bg-secondary, #f3f4f6);
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-/* Bonus icon in history */
-.transaction-icon.icon-bonus {
-  background: linear-gradient(135deg, #F59E0B, #D97706);
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22C55E, #16A34A);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+.progress-labels {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.progress-labels span:first-child {
+  font-weight: 700;
+  color: var(--text-primary, #1f2937);
+}
+
+/* Progress states */
+.progress-card.eligible {
+  border-color: #22C55E;
+  background: linear-gradient(135deg, rgba(34,197,94,0.05) 0%, rgba(34,197,94,0.02) 100%);
+}
+
+.progress-card.eligible .progress-fill {
+  background: linear-gradient(90deg, #22C55E, #16A34A);
+}
+
+/* =============================================
+   STATS ROW - Referral Page Specific
+   ============================================= */
+.referral-stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.referral-stat-card {
+  background: var(--bg-card, #fff) !important;
+  border-radius: 16px !important;
+  padding: 1rem !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 0.875rem !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+  border: 1px solid var(--border-color, #e5e7eb) !important;
+  grid-column: span 1 !important;
+}
+
+.referral-stat-card .stat-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.referral-stat-card .stat-icon-wrap.blue {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
   color: white;
 }
 
-/* Mobile Responsive */
+.referral-stat-card .stat-icon-wrap.green {
+  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+  color: white;
+}
+
+.referral-stat-card .stat-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  align-items: flex-start !important;
+  text-align: left !important;
+}
+
+.referral-stat-card .stat-number {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-primary, #1f2937) !important;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.referral-stat-card .stat-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #6b7280) !important;
+  font-weight: 500;
+}
+
+/* =============================================
+   BONUS SECTION
+   ============================================= */
+.bonus-section {
+  background: var(--bg-card, #fff);
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.bonus-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.bonus-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.claim-all-btn {
+  background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 0.4rem 0.875rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.claim-all-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+}
+
+.claim-all-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary, #1f2937);
+  margin: 0;
+}
+
+.title-icon {
+  font-size: 1.1rem;
+}
+
+.bonus-amount-badge {
+  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+  color: white;
+  padding: 0.4rem 0.875rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.bonus-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Bonus Item */
+.bonus-item-v2 {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem;
+  background: var(--bg-secondary, #f9fafb);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.bonus-item-v2:hover {
+  background: var(--bg-tertiary, #f3f4f6);
+}
+
+.bonus-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.bonus-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.bonus-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+  margin: 0 0 0.15rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bonus-deposit {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #6b7280);
+  margin: 0;
+}
+
+.bonus-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.bonus-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #22C55E;
+}
+
+.claim-btn {
+  background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 0.875rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.claim-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+}
+
+.claim-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.claimed-badge {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16A34A;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.claiming-badge {
+  background: rgba(59, 130, 246, 0.15);
+  color: #2563eb;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Empty States */
+.bonus-empty,
+.referrals-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.5;
+}
+
+.empty-illustration {
+  margin-bottom: 0.75rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.empty-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+  margin: 0 0 0.25rem 0;
+}
+
+.empty-text {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #6b7280);
+  margin: 0;
+}
+
+/* =============================================
+   REFERRALS LIST SECTION
+   ============================================= */
+.referrals-section {
+  background: var(--bg-card, #fff);
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.section-header {
+  margin-bottom: 1rem;
+}
+
+.referrals-list-v2 {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+/* Referral Item */
+.referral-item-v2 {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem;
+  background: var(--bg-secondary, #f9fafb);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.referral-item-v2:hover {
+  background: var(--bg-tertiary, #f3f4f6);
+  transform: translateX(4px);
+}
+
+.referral-avatar-v2 {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.referral-info-v2 {
+  flex: 1;
+  min-width: 0;
+}
+
+.referral-name-v2 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+  margin: 0 0 0.15rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.referral-email-v2 {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #6b7280);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.referral-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.status-badge.confirmed {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16A34A;
+}
+
+.status-badge.pending {
+  background: rgba(245, 158, 11, 0.15);
+  color: #D97706;
+}
+
+.referral-date-v2 {
+  font-size: 0.7rem;
+  color: var(--text-tertiary, #9ca3af);
+}
+
+/* =============================================
+   LOADING STATES
+   ============================================= */
+.loading-skeleton {
+  background: linear-gradient(90deg, 
+    var(--bg-secondary, #f3f4f6) 25%, 
+    var(--bg-tertiary, #e5e7eb) 50%, 
+    var(--bg-secondary, #f3f4f6) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* =============================================
+   DARK MODE SUPPORT
+   ============================================= */
+[data-theme="dark"] .referral-hero {
+  background: linear-gradient(135deg, #0066FF 0%, #0052CC 50%, #0747A6 100%);
+}
+
+[data-theme="dark"] .referral-stat-card,
+[data-theme="dark"] .progress-card,
+[data-theme="dark"] .bonus-section,
+[data-theme="dark"] .referrals-section {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .bonus-item-v2,
+[data-theme="dark"] .referral-item-v2 {
+  background: var(--bg-secondary);
+}
+
+[data-theme="dark"] .bonus-item-v2:hover,
+[data-theme="dark"] .referral-item-v2:hover {
+  background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .progress-bar {
+  background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .referral-stat-card .stat-number {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .referral-stat-card .stat-label {
+  color: var(--text-secondary) !important;
+}
+
+/* =============================================
+   MOBILE RESPONSIVE
+   ============================================= */
 @media (max-width: 768px) {
-  .referral-code {
-    font-size: 2rem;
-    letter-spacing: 0.3rem;
-  }
-
-  .code-box {
-    padding: 1.5rem 2rem;
-  }
-
-  .referral-actions {
-    width: 100%;
-  }
-
-  .referral-actions .btn {
-    flex: 1;
-  }
-
-  .referral-item,
-  .bonus-item,
-  .claim-history-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
-
-  .referral-date,
-  .bonus-amount-section,
-  .claim-status-section {
-    align-self: flex-end;
-  }
-
-  .bonus-amount-section,
-  .claim-status-section {
-    flex-direction: row;
-    align-items: center;
+  .referrals-container-v2 {
+    padding: 0.25rem;
     gap: 1rem;
   }
 
-  .referral-stats-card .stats-grid {
-    grid-template-columns: 1fr 1fr;
+  .referral-hero {
+    border-radius: 16px;
+    padding: 1.5rem 1.25rem;
   }
+
+  .hero-title {
+    font-size: 1.35rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .code-text {
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+  }
+
+  .referral-code-box {
+    max-width: 260px;
+  }
+
+  .share-btn {
+    width: 100%;
+    max-width: 260px;
+  }
+
+  /* Keep stats row horizontal on mobile for referrals page */
+  .referral-stats-row {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.625rem;
+  }
+
+  .referral-stat-card {
+    padding: 0.875rem !important;
+    gap: 0.75rem !important;
+    flex-direction: row !important;
+    text-align: left !important;
+    grid-column: span 1 !important;
+  }
+
+  .referral-stat-card .stat-icon-wrap {
+    width: 42px;
+    height: 42px;
+  }
+
+  .referral-stat-card .stat-content {
+    align-items: flex-start !important;
+  }
+
+  .referral-stat-card .stat-number {
+    font-size: 1.15rem;
+  }
+
+  .referral-stat-card .stat-label {
+    font-size: 0.7rem;
+  }
+
+  .progress-card,
+  .bonus-section,
+  .referrals-section {
+    padding: 1rem;
+    border-radius: 14px;
+  }
+
+  .bonus-item-v2,
+  .referral-item-v2 {
+    padding: 0.75rem;
+  }
+
+  .bonus-avatar,
+  .referral-avatar-v2 {
+    width: 38px;
+    height: 38px;
+    font-size: 0.85rem;
+  }
+
+  .bonus-name,
+  .referral-name-v2 {
+    font-size: 0.85rem;
+  }
+
+  .bonus-value {
+    font-size: 0.9rem;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+  .hero-title {
+    font-size: 1.2rem;
+  }
+
+  .code-text {
+    font-size: 1.3rem;
+    letter-spacing: 2px;
+  }
+
+  /* Keep horizontal layout even on very small screens */
+  .referral-stats-row {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .referral-stat-card {
+    padding: 0.75rem 0.5rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .referral-stat-card .stat-icon-wrap {
+    width: 36px;
+    height: 36px;
+  }
+
+  .referral-stat-card .stat-number {
+    font-size: 1rem;
+  }
+
+  .referral-stat-card .stat-label {
+    font-size: 0.65rem;
+  }
+}
+
+/* =============================================
+   LEGACY SUPPORT - Keep old class names working
+   ============================================= */
+.referrals-container {
+  display: none; /* Hide old container if still in DOM */
 }

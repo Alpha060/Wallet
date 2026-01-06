@@ -409,16 +409,24 @@ body {
   border-radius: 50%;
 }
 
+.transaction-icon svg,
+.history-icon svg {
+  stroke: currentColor;
+}
+
 .icon-deposit {
-  background: #d1e7dd;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
 }
 
 .icon-withdrawal {
-  background: #f8d7da;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
 }
 
 .icon-bonus {
-  background: #fef3c7;
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
 }
 
 .transaction-details,
@@ -910,6 +918,60 @@ body {
   border-bottom: none;
 }
 
+/* Payment Method Section in Settings */
+.payment-method-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.payment-method-section:last-of-type {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.section-subtitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.section-subtitle svg {
+  color: var(--primary-color);
+}
+
+/* Read-only field styling for withdrawal form */
+.readonly-field {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+  cursor: not-allowed;
+  border-color: var(--border-color) !important;
+}
+
+.readonly-field:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: var(--border-color) !important;
+}
+
+.settings-hint {
+  margin-top: 0.25rem;
+}
+
+.settings-hint a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+.settings-hint a:hover {
+  text-decoration: underline;
+}
+
 .current-qr {
   margin: 1rem 0;
   text-align: center;
@@ -1031,38 +1093,8 @@ body {
   padding: 2rem;
 }
 
-/* Toast Notifications */
-.toast {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  background: var(--bg-card);
-  color: var(--text-primary);
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  z-index: 2000;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: all 0.3s;
-}
-
-.toast.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.toast-success {
-  border-left: 4px solid var(--success-color);
-}
-
-.toast-error {
-  border-left: 4px solid var(--error-color);
-}
-
-.toast-info {
-  border-left: 4px solid var(--primary-color);
-}
+/* Toast Notifications - Styles moved to components.css for top-right positioning */
+/* See components.css #toast-container and .toast styles */
 
 /* Spinner */
 .spinner {
@@ -1217,6 +1249,31 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+/* Table type icon styles */
+.table-type-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.table-type-icon.type-deposit {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.table-type-icon.type-withdrawal {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.table-type-icon.type-bonus {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
 }
 
 .table-amount {

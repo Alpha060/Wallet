@@ -75,7 +75,10 @@ class UserRepository {
         password_hash as "passwordHash",
         is_admin as "isAdmin",
         is_active as "isActive",
-        wallet_balance as "walletBalance", 
+        wallet_balance as "walletBalance",
+        saved_upi_id as "savedUpiId",
+        saved_bank_details as "savedBankDetails",
+        preferred_payment_method as "preferredPaymentMethod",
         created_at as "createdAt", 
         updated_at as "updatedAt"
       FROM users
@@ -161,6 +164,50 @@ class UserRepository {
     `;
     
     const values = [newBalance, id];
+    const result = await pool.query(query, values);
+    return result.rows[0];
+  }
+
+  /**
+   * Update user's saved payment details
+   * @param {string} id - User ID (UUID)
+   * @param {Object} updates - Payment details to update
+   * @returns {Promise<Object>} Updated user object
+   */
+  async updatePaymentDetails(id, updates) {
+    const { savedUpiId, savedBankDetails, preferredPaymentMethod } = updates;
+    const fields = [];
+    const values = [];
+    let paramCount = 1;
+
+    if (savedUpiId !== undefined) {
+      fields.push(`saved_upi_id = $${paramCount++}`);
+      values.push(savedUpiId);
+    }
+
+    if (savedBankDetails !== undefined) {
+      fields.push(`saved_bank_details = $${paramCount++}`);
+      values.push(savedBankDetails ? JSON.stringify(savedBankDetails) : null);
+    }
+
+    if (preferredPaymentMethod !== undefined) {
+      fields.push(`preferred_payment_method = $${paramCount++}`);
+      values.push(preferredPaymentMethod);
+    }
+
+    if (fields.length === 0) {
+      throw new Error('No fields to update');
+    }
+
+    values.push(id);
+    const query = `
+      UPDATE users
+      SET ${fields.join(', ')}
+      WHERE id = $${paramCount}
+      RETURNING id, saved_upi_id as "savedUpiId", saved_bank_details as "savedBankDetails", 
+                preferred_payment_method as "preferredPaymentMethod"
+    `;
+
     const result = await pool.query(query, values);
     return result.rows[0];
   }

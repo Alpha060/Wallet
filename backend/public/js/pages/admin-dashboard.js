@@ -42,20 +42,24 @@ function setupThemeToggle() {
   const mobileAdminThemeToggle = document.getElementById('mobileAdminThemeToggle');
   const mobileAdminThemeIcon = document.getElementById('mobileAdminThemeIcon');
   
+  // SVG icons for theme toggle
+  const moonIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+  const sunIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
+  
   // Set initial icon
   const currentTheme = ThemeManager.getCurrentTheme();
-  const iconText = currentTheme === 'dark' ? '☀️' : '🌙';
+  const iconHtml = currentTheme === 'dark' ? sunIcon : moonIcon;
   
-  if (adminThemeIcon) adminThemeIcon.textContent = iconText;
-  if (mobileAdminThemeIcon) mobileAdminThemeIcon.textContent = iconText;
+  if (adminThemeIcon) adminThemeIcon.innerHTML = iconHtml;
+  if (mobileAdminThemeIcon) mobileAdminThemeIcon.innerHTML = iconHtml;
   
   // Desktop theme toggle handler
   if (adminThemeToggle) {
     adminThemeToggle.addEventListener('click', () => {
       const newTheme = ThemeManager.toggleTheme();
-      const newIconText = newTheme === 'dark' ? '☀️' : '🌙';
-      if (adminThemeIcon) adminThemeIcon.textContent = newIconText;
-      if (mobileAdminThemeIcon) mobileAdminThemeIcon.textContent = newIconText;
+      const newIconHtml = newTheme === 'dark' ? sunIcon : moonIcon;
+      if (adminThemeIcon) adminThemeIcon.innerHTML = newIconHtml;
+      if (mobileAdminThemeIcon) mobileAdminThemeIcon.innerHTML = newIconHtml;
     });
   }
 
@@ -63,9 +67,9 @@ function setupThemeToggle() {
   if (mobileAdminThemeToggle) {
     mobileAdminThemeToggle.addEventListener('click', () => {
       const newTheme = ThemeManager.toggleTheme();
-      const newIconText = newTheme === 'dark' ? '☀️' : '🌙';
-      if (adminThemeIcon) adminThemeIcon.textContent = newIconText;
-      if (mobileAdminThemeIcon) mobileAdminThemeIcon.textContent = newIconText;
+      const newIconHtml = newTheme === 'dark' ? sunIcon : moonIcon;
+      if (adminThemeIcon) adminThemeIcon.innerHTML = newIconHtml;
+      if (mobileAdminThemeIcon) mobileAdminThemeIcon.innerHTML = newIconHtml;
     });
   }
 }
@@ -249,7 +253,7 @@ async function loadPendingDeposits() {
             ${deposit.transactionId ? `<p class="request-details-text">TxID: ${escapeHtml(deposit.transactionId)}</p>` : ''}
             ${deposit.paymentProofUrl ? `
               <button class="btn-view-proof" onclick="viewProofModal('${escapeHtml(deposit.paymentProofUrl)}')">
-                📷 View Proof
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>View Proof
               </button>
             ` : ''}
           </div>
@@ -258,10 +262,10 @@ async function loadPendingDeposits() {
           </div>
           <div class="request-right">
             <button class="btn btn-success btn-compact" onclick="approveDeposit('${escapeHtml(deposit.id)}')">
-              ✓ Approve
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>Approve
             </button>
             <button class="btn btn-danger btn-compact" onclick="rejectDeposit('${escapeHtml(deposit.id)}')">
-              ✗ Reject
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 2px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Reject
             </button>
           </div>
         </div>
@@ -292,7 +296,7 @@ async function loadPendingWithdrawals() {
           <div class="request-left">
             <p class="request-user-name">${escapeHtml(withdrawal.userName || withdrawal.userEmail.split('@')[0])} • ${escapeHtml(withdrawal.userEmail)}</p>
             <p class="request-date">${formatDate(withdrawal.createdAt)}</p>
-            <p class="request-method-small">${withdrawal.bankDetails.type === 'upi' ? '💳 UPI' : '🏦 Bank Account'}</p>
+            <p class="request-method-small">${withdrawal.bankDetails.type === 'upi' ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>UPI' : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><path d="M3 21h18"></path><path d="M3 10h18"></path><path d="M5 6l7-3 7 3"></path><path d="M4 10v11"></path><path d="M20 10v11"></path><path d="M8 14v3"></path><path d="M12 14v3"></path><path d="M16 14v3"></path></svg>Bank Account'}</p>
             ${withdrawal.bankDetails.type === 'upi' ? `
               <p class="request-details-text">${escapeHtml(withdrawal.bankDetails.upiId)}</p>
             ` : `
@@ -305,10 +309,10 @@ async function loadPendingWithdrawals() {
           </div>
           <div class="request-right">
             <button class="btn btn-success btn-compact" onclick="confirmWithdrawal('${escapeHtml(withdrawal.id)}')">
-              ✓ Confirm
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>Confirm
             </button>
             <button class="btn btn-danger btn-compact" onclick="rejectWithdrawal('${escapeHtml(withdrawal.id)}')">
-              ✗ Reject
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 2px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Reject
             </button>
           </div>
         </div>
@@ -629,17 +633,17 @@ async function loadPendingBonusClaims() {
           <div class="request-left">
             <p class="request-user-name">${escapeHtml(claim.userName || claim.userEmail.split('@')[0])} • ${escapeHtml(claim.userEmail)}</p>
             <p class="request-date">${formatDate(claim.createdAt)}</p>
-            <p class="request-details-text">🎁 Referral bonus from: ${escapeHtml(claim.referredUserName || 'Anonymous')}</p>
+            <p class="request-details-text"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><rect x="3" y="8" width="18" height="4" rx="1"></rect><path d="M12 8v13"></path><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"></path><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"></path></svg>Referral bonus from: ${escapeHtml(claim.referredUserName || 'Anonymous')}</p>
           </div>
           <div class="request-center">
             <p class="request-amount-compact">${formatAmount(claim.amount)}</p>
           </div>
           <div class="request-right">
             <button class="btn btn-success btn-compact" onclick="approveBonusClaim('${escapeHtml(claim.id)}')">
-              ✓ Approve
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>Approve
             </button>
             <button class="btn btn-danger btn-compact" onclick="rejectBonusClaim('${escapeHtml(claim.id)}')">
-              ✗ Reject
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 2px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Reject
             </button>
           </div>
         </div>
@@ -699,34 +703,53 @@ async function loadHistory() {
       return;
     }
 
-    tbody.innerHTML = data.transactions.map(tx => `
-      <tr>
-        <td data-label="Date">${formatDate(tx.createdAt)}</td>
-        <td data-label="User">
-          <div class="table-user-info">
-            <span class="table-user-name">${escapeHtml(tx.userName || 'N/A')}</span>
-            <span class="table-user-email">${escapeHtml(tx.userEmail)}</span>
-          </div>
-        </td>
-        <td data-label="Type">
-          <span class="table-type">
-            ${tx.type === 'deposit' ? '📥 Deposit' : '📤 Withdrawal'}
-          </span>
-        </td>
-        <td data-label="Amount" class="table-amount">${formatAmount(tx.amount)}</td>
-        <td data-label="Status">
-          <span class="status-badge ${getStatusClass(tx.status)}">${escapeHtml(tx.status)}</span>
-        </td>
-        <td data-label="Action">
-          <div class="table-actions">
-            ${tx.type === 'deposit' && tx.paymentProofUrl ? 
-              `<button class="btn-view" onclick="viewScreenshot('${escapeHtml(tx.paymentProofUrl)}')">View Proof</button>` : 
-              '<span style="color: var(--text-secondary); font-size: 0.875rem;">N/A</span>'
-            }
-          </div>
-        </td>
-      </tr>
-    `).join('');
+    // SVG icons for transaction types
+    const depositIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"></path><path d="m6 15 6 6 6-6"></path></svg>';
+    const withdrawalIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V3"></path><path d="m6 9 6-6 6 6"></path></svg>';
+    const bonusIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"></path><path d="M2 7h20v5H2z"></path><path d="M12 22V7"></path><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>';
+
+    tbody.innerHTML = data.transactions.map(tx => {
+      let typeIcon, typeClass;
+      if (tx.type === 'deposit') {
+        typeIcon = depositIcon;
+        typeClass = 'type-deposit';
+      } else if (tx.type === 'withdrawal') {
+        typeIcon = withdrawalIcon;
+        typeClass = 'type-withdrawal';
+      } else {
+        typeIcon = bonusIcon;
+        typeClass = 'type-bonus';
+      }
+      
+      return `
+        <tr>
+          <td data-label="Date">${formatDate(tx.createdAt)}</td>
+          <td data-label="User">
+            <div class="table-user-info">
+              <span class="table-user-name">${escapeHtml(tx.userName || 'N/A')}</span>
+              <span class="table-user-email">${escapeHtml(tx.userEmail)}</span>
+            </div>
+          </td>
+          <td data-label="Type">
+            <span class="table-type-icon ${typeClass}" title="${tx.type}">
+              ${typeIcon}
+            </span>
+          </td>
+          <td data-label="Amount" class="table-amount">${formatAmount(tx.amount)}</td>
+          <td data-label="Status">
+            <span class="status-badge ${getStatusClass(tx.status)}">${escapeHtml(tx.status)}</span>
+          </td>
+          <td data-label="Action">
+            <div class="table-actions">
+              ${tx.type === 'deposit' && tx.paymentProofUrl ? 
+                `<button class="btn-view" onclick="viewScreenshot('${escapeHtml(tx.paymentProofUrl)}')">View Proof</button>` : 
+                '<span style="color: var(--text-secondary); font-size: 0.875rem;">N/A</span>'
+              }
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
 
     // Setup filter tabs
     setupHistoryFilters();
@@ -1051,7 +1074,7 @@ async function deleteUser(userId, userName) {
   console.log('deleteUser called with:', { userId, userName });
   
   try {
-    const confirmMessage = `⚠️ WARNING: This will permanently delete "${userName}" and all their data including:\n\n• User account\n• Wallet balance\n• All deposit requests\n• All withdrawal requests\n\nThis action CANNOT be undone!\n\nType "DELETE" to confirm:`;
+    const confirmMessage = `WARNING: This will permanently delete "${userName}" and all their data including:\n\n• User account\n• Wallet balance\n• All deposit requests\n• All withdrawal requests\n\nThis action CANNOT be undone!\n\nType "DELETE" to confirm:`;
     
     const confirmation = prompt(confirmMessage);
     
@@ -1221,24 +1244,50 @@ async function showUserHistory(userId, userName, userEmail) {
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
     
+    // SVG icons
+    const depositIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"></path><path d="m6 15 6 6 6-6"></path></svg>';
+    const withdrawalIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V3"></path><path d="m6 9 6-6 6 6"></path></svg>';
+    const bonusIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"></path><path d="M2 7h20v5H2z"></path><path d="M12 22V7"></path><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>';
+    
     modalTransactionsList.innerHTML = displayTransactions.map((tx, index) => {
       // Determine transaction type based on available fields
       const isDeposit = tx.paymentProofUrl || tx.transactionId;
       const isWithdrawal = tx.bankDetails;
-      const txType = isDeposit ? 'deposit' : (isWithdrawal ? 'withdrawal' : 'unknown');
+      const isBonus = tx.type === 'bonus' || tx.referredUserName;
+      
+      let txType, icon, iconClass;
+      if (isBonus) {
+        txType = 'bonus';
+        icon = bonusIcon;
+        iconClass = 'icon-bonus';
+      } else if (isDeposit) {
+        txType = 'deposit';
+        icon = depositIcon;
+        iconClass = 'icon-deposit';
+      } else if (isWithdrawal) {
+        txType = 'withdrawal';
+        icon = withdrawalIcon;
+        iconClass = 'icon-withdrawal';
+      } else {
+        txType = 'unknown';
+        icon = depositIcon;
+        iconClass = '';
+      }
+      
+      const title = isBonus ? `Bonus from ${escapeHtml(tx.referredUserName || 'Referral')}` : txType.charAt(0).toUpperCase() + txType.slice(1);
       
       return `
         <div class="transaction-item" data-type="${escapeHtml(txType)}">
-          <div class="transaction-icon">
-            ${txType === 'deposit' ? '+' : txType === 'withdrawal' ? '↗' : '↔'}
+          <div class="transaction-icon ${iconClass}">
+            ${icon}
           </div>
           <div class="transaction-details">
-            <h4>${escapeHtml(txType.charAt(0).toUpperCase() + txType.slice(1))}</h4>
+            <h4>${title}</h4>
             <p class="transaction-date">${formatDate(tx.createdAt)}</p>
             <p class="transaction-status ${getStatusClass(tx.status)}">${escapeHtml(tx.status)}</p>
           </div>
-          <div class="transaction-amount ${txType === 'deposit' ? 'positive' : 'negative'}">
-            ${txType === 'deposit' ? '+' : '-'}${formatAmount(tx.amount)}
+          <div class="transaction-amount ${txType === 'withdrawal' ? 'negative' : 'positive'}">
+            ${txType === 'withdrawal' ? '-' : '+'}${formatAmount(tx.amount)}
           </div>
         </div>
       `;

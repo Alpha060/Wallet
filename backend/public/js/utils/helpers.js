@@ -44,22 +44,48 @@ export function getStatusClass(status) {
   return statusMap[status] || 'status-pending';
 }
 
-// Show toast notification
+// Show toast notification (Global Top-Right Handler)
 export function showToast(message, type = 'info') {
+  // 1. Get or Create the Container
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  // 2. Create the Toast Element
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
-  toast.textContent = message;
   
-  document.body.appendChild(toast);
+  // Add icon based on type (Optional visual polish)
+  let icon = '';
+  if (type === 'success') icon = '✅ ';
+  if (type === 'error') icon = '❌ ';
+  if (type === 'info') icon = 'ℹ️ ';
   
-  setTimeout(() => {
+  toast.textContent = icon + message;
+  
+  // 3. Add to container (Stacks automatically)
+  container.appendChild(toast);
+  
+  // 4. Animate In
+  requestAnimationFrame(() => {
     toast.classList.add('show');
-  }, 100);
+  });
   
+  // 5. Remove after 5 seconds
   setTimeout(() => {
     toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
+    // Wait for fade out animation
+    setTimeout(() => {
+      toast.remove();
+      // Cleanup container if empty
+      if (container.children.length === 0) {
+        container.remove();
+      }
+    }, 300);
+  }, 5000);
 }
 
 // Show loading spinner

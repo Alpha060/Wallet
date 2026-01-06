@@ -1,168 +1,143 @@
-const CACHE_NAME = 'kyc-app-v6'; // Updated version to force cache refresh
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/pages/login.html',
-  '/pages/user-dashboard.html',
-  '/pages/admin-dashboard.html',
-  '/pages/forgot-password.html',
-  '/css/styles.css',
-  '/css/reset.css',
-  '/css/variables.css',
-  '/css/typography.css',
-  '/css/layout.css',
-  '/css/components.css',
-  '/css/utilities.css',
-  '/css/animations.css',
-  '/css/mobile.css',
-  '/css/forgot-password.css',
-  '/js/pwa-install.js',
-  '/js/config.js',
-  '/favicon.ico'
+// Cache version - UPDATE THIS whenever you deploy changes
+const CACHE_VERSION = 'v8';
+const CACHE_NAME = `kyc-app-${CACHE_VERSION}`;
+
+// Static assets to pre-cache (shell)
+const STATIC_CACHE = [
+  '/favicon.ico',
+  '/icons/icon-72x72.png',
+  '/icons/icon-96x96.png',
+  '/icons/icon-128x128.png',
+  '/icons/icon-144x144.png',
+  '/icons/icon-152x152.png',
+  '/icons/icon-192x192.png',
+  '/icons/icon-384x384.png',
+  '/icons/icon-512x512.png'
 ];
 
 // URLs that should NEVER be cached (always fetch from network)
-const noCachePatterns = [
+const NEVER_CACHE = [
   '/api/',
-  '/uploads/',
-  '/js/pages/', // Don't cache JS pages - they change frequently
-  '/js/services/', // Don't cache API services
-  '/js/utils/' // Don't cache utilities
+  '/uploads/'
 ];
 
-// URLs that should use network-first strategy (check network first, fallback to cache)
-const networkFirstPatterns = [
-  '/pages/',
-  '/js/',
-  '/css/'
-];
-
-// Install event - cache resources
+// Install event - cache only essential static assets
 self.addEventListener('install', (event) => {
+  console.log(`[SW] Installing version ${CACHE_VERSION}`);
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
-      .catch((error) => {
-        console.error('Cache installation failed:', error);
+        console.log('[SW] Pre-caching static assets');
+        return cache.addAll(STATIC_CACHE).catch(err => {
+          console.warn('[SW] Some static assets failed to cache:', err);
+        });
       })
   );
+  // Force the waiting service worker to become active
   self.skipWaiting();
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up ALL old caches immediately
 self.addEventListener('activate', (event) => {
+  console.log(`[SW] Activating version ${CACHE_VERSION}`);
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
+            console.log('[SW] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
+    }).then(() => {
+      console.log('[SW] Claiming clients');
+      return self.clients.claim();
     })
   );
-  self.clients.claim();
 });
 
-// Check if URL should bypass cache (API calls, uploads, etc.)
-function shouldBypassCache(url) {
-  return noCachePatterns.some(pattern => url.includes(pattern));
+// Check if URL should never be cached
+function shouldNeverCache(url) {
+  return NEVER_CACHE.some(pattern => url.includes(pattern));
 }
 
-// Check if URL should use network-first strategy
-function shouldUseNetworkFirst(url) {
-  return networkFirstPatterns.some(pattern => url.includes(pattern));
-}
-
-// Fetch event - smart caching strategy
+// Fetch event - Network-first for everything except icons
 self.addEventListener('fetch', (event) => {
-  const requestUrl = event.request.url;
+  const requestUrl = new URL(event.request.url);
   
-  // For API calls and uploads - ALWAYS go to network, never cache
-  if (shouldBypassCache(requestUrl)) {
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') {
+    return;
+  }
+  
+  // Skip cross-origin requests
+  if (requestUrl.origin !== location.origin) {
+    return;
+  }
+  
+  // API calls and uploads - ALWAYS network, never cache
+  if (shouldNeverCache(requestUrl.pathname)) {
     event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          // Return error response for failed API calls
-          return new Response(JSON.stringify({ error: 'Network unavailable' }), {
-            status: 503,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        })
+      fetch(event.request).catch(() => {
+        return new Response(JSON.stringify({ error: 'Network unavailable' }), {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      })
     );
     return;
   }
   
-  // For pages, JS, CSS - network-first strategy (always try network first)
-  if (shouldUseNetworkFirst(requestUrl)) {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          // If network request succeeds, cache it and return
-          if (response && response.status === 200) {
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-          }
-          return response;
-        })
-        .catch(() => {
-          // Network failed, try cache
-          return caches.match(event.request)
-            .then((cachedResponse) => {
-              if (cachedResponse) {
-                console.log('Serving from cache (network failed):', requestUrl);
-                return cachedResponse;
-              }
-              // No cache either, return offline page
-              return caches.match('/index.html');
-            });
-        })
-    );
-    return;
-  }
-  
-  // For other assets - cache-first strategy
+  // For HTML, CSS, JS - NETWORK FIRST (always try to get fresh content)
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Cache hit - return response
-        if (response) {
-          return response;
+    fetch(event.request)
+      .then((networkResponse) => {
+        // Got network response - cache it for offline use
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
         }
-
-        return fetch(event.request).then(
-          (response) => {
-            // Check if valid response
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Clone the response
-            const responseToCache = response.clone();
-
-            // Cache the fetched response for future use
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          }
-        );
+        return networkResponse;
       })
       .catch(() => {
-        // Return offline page if available
-        return caches.match('/index.html');
+        // Network failed - try cache as fallback
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) {
+            console.log('[SW] Serving from cache (offline):', requestUrl.pathname);
+            return cachedResponse;
+          }
+          // No cache - return offline fallback for navigation requests
+          if (event.request.mode === 'navigate') {
+            return caches.match('/index.html');
+          }
+          return new Response('Offline', { status: 503 });
+        });
       })
   );
+});
+
+// Listen for messages from the main thread
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('[SW] Skip waiting requested');
+    self.skipWaiting();
+  }
+  
+  if (event.data && event.data.type === 'CLEAR_CACHE') {
+    console.log('[SW] Clear cache requested');
+    event.waitUntil(
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => caches.delete(cacheName))
+        );
+      }).then(() => {
+        console.log('[SW] All caches cleared');
+      })
+    );
+  }
 });
 
 // Background sync for offline form submissions
@@ -173,8 +148,7 @@ self.addEventListener('sync', (event) => {
 });
 
 async function syncKYCData() {
-  // Implement background sync logic here
-  console.log('Syncing KYC data in background');
+  console.log('[SW] Syncing KYC data in background');
 }
 
 // Push notification support
@@ -183,11 +157,7 @@ self.addEventListener('push', (event) => {
     body: event.data ? event.data.text() : 'New notification',
     icon: '/icons/icon-192x192.png',
     badge: '/icons/icon-72x72.png',
-    vibrate: [200, 100, 200],
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: 1
-    }
+    vibrate: [200, 100, 200]
   };
 
   event.waitUntil(
@@ -198,7 +168,5 @@ self.addEventListener('push', (event) => {
 // Notification click handler
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  event.waitUntil(
-    clients.openWindow('/')
-  );
+  event.waitUntil(clients.openWindow('/'));
 });
