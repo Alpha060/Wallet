@@ -1,0 +1,22 @@
+# .htaccess - URL rewrite rules for Apache web server
+
+RewriteEngine On
+
+# Ensure Authorization header is passed to PHP
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Serve existing files/directories directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Route API endpoints
+RewriteRule ^api/(.*)$ api.php?route=$1 [QSA,L]
+
+# Route pages to their respective PHP scripts
+RewriteRule ^$ index.php [L]
+RewriteRule ^login$ login.php [L]
+RewriteRule ^register$ register.php [L]
+RewriteRule ^forgot-password$ forgot-password.php [L]
+RewriteRule ^user-dashboard$ dashboard.php [L]
+RewriteRule ^admin-dashboard$ admin.php [L]
