@@ -11,7 +11,7 @@ require_once dirname(__DIR__) . '/src/helpers.php';
 try {
     echo "=== RESET ADMIN PASSWORD ===\n";
     
-    $email = 'admin@example.com';
+    $email = 'admin@aeropay.com';
     $password = 'admin123';
     $hash = hashPassword($password);
 
