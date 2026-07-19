@@ -18,54 +18,65 @@ $csrfToken = generateCsrfToken();
 ?>
 <!DOCTYPE html>
 <html lang="en">
-<script>document.documentElement.classList.toggle('dark', localStorage.getItem('theme') !== 'light');</script>
+<script>document.documentElement.classList.toggle('dark', localStorage.getItem('theme') === 'dark');</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/app.css">
+    <link rel="stylesheet" href="/app.css?v=2">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a0c">
     <link rel="apple-touch-icon" href="/icons/aeropay-logo.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
-        .register-wrapper {
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 24px;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 16px;
+            box-sizing: border-box;
         }
-        .register-card {
+        .register-wrapper {
+            position: relative;
+            z-index: 2;
             width: 100%;
             max-width: 460px;
-            padding: 36px;
-            z-index: 10;
+        }
+        .register-card {
+            background-color: var(--card) !important;
+            border: 1px solid var(--card-border) !important;
+            border-radius: var(--radius) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+            padding: 36px 30px;
+            width: 100%;
+            box-sizing: border-box;
         }
         .logo-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 24px;
             text-align: center;
+            margin-bottom: 24px;
         }
-        .logo-symbol {
-            width: 72px;
-            height: 72px;
-            background: linear-gradient(135deg, rgba(14,165,233,0.8) 0%, rgba(99,102,241,0.8) 100%);
-
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            font-size: 2rem;
+        .logo-container img {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            border-radius: 14px;
+            background-color: #000;
+            padding: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: 0 auto 12px auto;
+            display: block;
+        }
+        .logo-container h2 {
+            font-size: 1.6rem;
             font-weight: 800;
-            box-shadow: 0 12px 32px rgba(14, 165, 233, 0.4);
-            margin-bottom: 12px;
+            margin: 0;
         }
         .form-group {
             margin-bottom: 16px;
@@ -75,7 +86,7 @@ $csrfToken = generateCsrfToken();
             font-size: 0.8rem;
             font-weight: 600;
             color: var(--muted);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             margin-left: 4px;
         }
         .login-link {
@@ -97,6 +108,15 @@ $csrfToken = generateCsrfToken();
             margin-top: 4px;
             font-weight: 600;
         }
+        /* Override browser autofill input background colors */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px var(--card) inset !important;
+            -webkit-text-fill-color: var(--foreground) !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
     </style>
 </head>
 <body>
@@ -106,7 +126,7 @@ $csrfToken = generateCsrfToken();
     <div class="register-wrapper">
         <div class="glass-panel register-card">
             <div class="logo-container">
-                <div class="logo-symbol">A</div>
+                <img src="/icons/aeropay-logo.png" alt="AeroPay Logo" style="width: 54px; height: 54px; object-fit: contain; margin: 0 auto 10px auto; display: block;">
                 <h2>Aero<span class="text-gradient">Pay</span></h2>
                 <p style="color: var(--muted); font-size: 0.85rem; margin-top: 2px;">Your money, at the speed of air</p>
             </div>
@@ -161,7 +181,7 @@ $csrfToken = generateCsrfToken();
         </div>
     </div>
 
-    <script src="/app.js"></script>
+    <script src="/app.js?v=2"></script>
     <script>
         // Referral Code Validation
         const referralInput = document.getElementById('referralCode');

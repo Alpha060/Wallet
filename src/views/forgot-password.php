@@ -6,58 +6,89 @@ $csrfToken = generateCsrfToken();
 ?>
 <!DOCTYPE html>
 <html lang="en">
-<script>document.documentElement.classList.toggle('dark', localStorage.getItem('theme') !== 'light');</script>
+<script>document.documentElement.classList.toggle('dark', localStorage.getItem('theme') === 'dark');</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/app.css">
+    <link rel="stylesheet" href="/app.css?v=2">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a0c">
     <link rel="apple-touch-icon" href="/icons/aeropay-logo.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
-        .forgot-wrapper {
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 24px;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 16px;
+            box-sizing: border-box;
         }
-        .forgot-card {
+        .forgot-wrapper {
+            position: relative;
+            z-index: 2;
             width: 100%;
             max-width: 440px;
-            padding: 40px;
-            text-align: center;
-            z-index: 10;
         }
-        .logo-symbol {
-            width: 72px;
-            height: 72px;
-            background: linear-gradient(135deg, rgba(14,165,233,0.8) 0%, rgba(99,102,241,0.8) 100%);
-
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            font-size: 2rem;
-            font-weight: 800;
-            box-shadow: 0 12px 32px rgba(14, 165, 233, 0.4);
-            margin: 0 auto 20px auto;
+        .forgot-card {
+            background-color: var(--card) !important;
+            border: 1px solid var(--card-border) !important;
+            border-radius: var(--radius) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+            padding: 36px 30px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .logo-container img {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            border-radius: 14px;
+            background-color: #000;
+            padding: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: 0 auto 12px auto;
+            display: block;
         }
         .message-box {
-            background: rgba(14, 165, 233, 0.08);
-            border: 1px solid rgba(14, 165, 233, 0.15);
+            background: rgba(217, 119, 6, 0.08);
+            border: 1px solid rgba(217, 119, 6, 0.15);
             border-radius: var(--radius-sm);
-            padding: 24px;
-            margin: 24px 0;
-            line-height: 1.6;
+            padding: 16px;
+            margin: 20px 0;
+            line-height: 1.5;
             color: var(--foreground);
-            font-size: 0.95rem;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+        .form-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 8px;
+            margin-left: 4px;
+        }
+        /* Override browser autofill input background colors */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px var(--card) inset !important;
+            -webkit-text-fill-color: var(--foreground) !important;
+            transition: background-color 5000s ease-in-out 0s;
         }
     </style>
 </head>
@@ -67,8 +98,10 @@ $csrfToken = generateCsrfToken();
 
     <div class="forgot-wrapper">
         <div class="glass-panel forgot-card">
-            <div class="logo-symbol">A</div>
-            <h2>Reset Password</h2>
+            <div class="logo-container" style="text-align: center; margin-bottom: 24px;">
+                <img src="/icons/aeropay-logo.png" alt="AeroPay Logo" style="width: 54px; height: 54px; object-fit: contain; margin: 0 auto 10px auto; display: block;">
+                <h2 style="font-size: 1.8rem; font-weight: 800; margin: 0;">Reset Password</h2>
+            </div>
             
             <div class="message-box">
                 Verify your saved KYC details to reset your password. If your PAN or date of birth is not saved, contact administration for manual verification.
@@ -113,7 +146,7 @@ $csrfToken = generateCsrfToken();
         </div>
     </div>
 
-    <script src="/app.js"></script>
+    <script src="/app.js?v=2"></script>
     <script>
         const form = document.getElementById('reset-form');
         const panInput = document.getElementById('panNumber');

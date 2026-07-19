@@ -1,8 +1,8 @@
-const CACHE_NAME = 'aeropay-cache-v1';
+const CACHE_NAME = 'aeropay-cache-v2';
 const ASSETS = [
     '/',
-    '/app.css',
-    '/app.js',
+    '/app.css?v=2',
+    '/app.js?v=2',
     '/icons/aeropay-logo.png'
 ];
 
@@ -29,22 +29,23 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-    // Only cache GET requests
+    // Only intercept GET requests
     if (e.request.method !== 'GET') return;
     
     e.respondWith(
-        caches.match(e.request).then((cachedResponse) => {
-            return cachedResponse || fetch(e.request).then(response => {
-                // If it is a valid request from our origin, cache it
-                if (response && response.status === 200 && response.type === 'basic') {
-                    const responseClone = response.clone();
-                    caches.open(CACHE_NAME).then(cache => {
-                        cache.put(e.request, responseClone);
-                    });
-                }
-                return response;
-            }).catch(() => {
-                return caches.match('/');
+        fetch(e.request).then((response) => {
+            // If the fetch succeeds, clone and store it in cache
+            if (response && response.status === 200 && response.type === 'basic') {
+                const responseClone = response.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(e.request, responseClone);
+                });
+            }
+            return response;
+        }).catch(() => {
+            // If offline, check if we have it in cache
+            return caches.match(e.request).then((cachedResponse) => {
+                return cachedResponse || caches.match('/');
             });
         })
     );

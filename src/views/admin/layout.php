@@ -6,11 +6,11 @@ $activePage = $activePage ?? 'dashboard';
 ?>
 <!DOCTYPE html>
 <html lang="en">
-<script>document.documentElement.classList.toggle('dark', localStorage.getItem('theme') !== 'light');</script>
+<script>document.documentElement.classList.toggle('dark', localStorage.getItem('theme') === 'dark');</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/app.css">
+    <link rel="stylesheet" href="/app.css?v=2">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a0c">
     <link rel="apple-touch-icon" href="/icons/aeropay-logo.png">
@@ -309,7 +309,7 @@ $activePage = $activePage ?? 'dashboard';
         </div>
     </div>
 
-    <script src="/app.js"></script>
+    <script src="/app.js?v=2"></script>
     <script>
         // Sidebar & Backdrop
         const sidebar = document.querySelector('.sidebar');
