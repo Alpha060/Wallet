@@ -38,6 +38,9 @@ if (!$dbUrl) {
     die("Error: DATABASE_URL not found in .env.local");
 }
 
+// Clean optional surrounding quotes if pasted literally in hosting panel
+$dbUrl = preg_replace('/^["\']|["\']$/', '', trim($dbUrl));
+
 // Parse MySQL URL
 $parsedUrl = parse_url($dbUrl);
 if (!$parsedUrl || !isset($parsedUrl['host'])) {
