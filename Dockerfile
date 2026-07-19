@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y \
     libsqlite3-dev \
     ca-certificates \
     openssl \
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql \
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql mysqli \
     && update-ca-certificates \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*

@@ -45,6 +45,45 @@ $password = $parsedUrl['pass'] ?? '';
 
 $dsn = "mysql:host=$host;port=$port;dbname=$dbName;charset=utf8mb4";
 
+echo "--- mysqli connection tests for detailed OpenSSL errors ---\n";
+
+// Attempt 6: mysqli with local cert
+echo "Attempt 6: mysqli with local ca-cert.pem...\n";
+$link = mysqli_init();
+if (!$link) {
+    echo "  mysqli_init failed\n\n";
+} else {
+    mysqli_ssl_set($link, NULL, NULL, dirname(__DIR__) . '/db/ca-cert.pem', NULL, NULL);
+    // Disable server verify (equivalent to 1013=false)
+    mysqli_options($link, MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, false);
+    
+    if (@mysqli_real_connect($link, $host, $user, $password, $dbName, $port)) {
+        echo "  --> SUCCESS!\n\n";
+        mysqli_close($link);
+    } else {
+        echo "  --> FAILED: " . mysqli_connect_error() . " (Code: " . mysqli_connect_errno() . ")\n\n";
+    }
+}
+
+// Attempt 7: mysqli with system cert
+echo "Attempt 7: mysqli with system ca-certificates.crt...\n";
+$link = mysqli_init();
+if (!$link) {
+    echo "  mysqli_init failed\n\n";
+} else {
+    mysqli_ssl_set($link, NULL, NULL, '/etc/ssl/certs/ca-certificates.crt', NULL, NULL);
+    mysqli_options($link, MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, false);
+    
+    if (@mysqli_real_connect($link, $host, $user, $password, $dbName, $port)) {
+        echo "  --> SUCCESS!\n\n";
+        mysqli_close($link);
+    } else {
+        echo "  --> FAILED: " . mysqli_connect_error() . " (Code: " . mysqli_connect_errno() . ")\n\n";
+    }
+}
+
+echo "--- PDO connection tests ---\n";
+
 $attempts = [
     'Attempt 1: Local ca-cert.pem + verify=false' => [
         1008 => dirname(__DIR__) . '/db/ca-cert.pem',
