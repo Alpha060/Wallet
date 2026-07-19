@@ -1,0 +1,13 @@
+# .htaccess - URL rewrite rules for Apache web server
+RewriteEngine On
+
+# Ensure Authorization header is passed to PHP
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Serve existing files/directories directly (e.g. public/app.css, public/app.js)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Route all other requests to the Front Controller
+RewriteRule ^(.*)$ index.php [QSA,L]
