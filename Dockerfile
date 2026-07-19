@@ -17,5 +17,9 @@ RUN a2enmod rewrite
 # Copy project files into Apache document root
 COPY . /var/www/html/
 
+# Ensure Apache www-data user has proper permissions to read project files (especially db/ca-cert.pem)
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
+
 # Expose port 80
 EXPOSE 80
