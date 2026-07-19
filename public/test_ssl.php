@@ -45,6 +45,20 @@ $password = $parsedUrl['pass'] ?? '';
 
 $dsn = "mysql:host=$host;port=$port;dbname=$dbName;charset=utf8mb4";
 
+// Print PDO mysqlnd SSL capabilities
+echo "--- PHP PDO / mysqlnd Capabilities ---\n";
+ob_start();
+phpinfo(INFO_MODULES);
+$info = ob_get_clean();
+if (preg_match_all('/(mysqlnd|pdo_mysql).*?SSL.*?\n/i', $info, $matches)) {
+    foreach ($matches[0] as $match) {
+        echo trim(strip_tags($match)) . "\n";
+    }
+} else {
+    echo "Could not find mysqlnd/pdo_mysql SSL info in phpinfo()\n";
+}
+echo "\n";
+
 echo "--- mysqli connection tests for detailed OpenSSL errors ---\n";
 
 // Attempt 6: mysqli with local cert
@@ -54,7 +68,6 @@ if (!$link) {
     echo "  mysqli_init failed\n\n";
 } else {
     mysqli_ssl_set($link, NULL, NULL, dirname(__DIR__) . '/db/ca-cert.pem', NULL, NULL);
-    // Disable server verify (equivalent to 1013=false)
     mysqli_options($link, MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, false);
     
     if (@mysqli_real_connect($link, $host, $user, $password, $dbName, $port)) {
@@ -104,6 +117,10 @@ $attempts = [
     'Attempt 5: NO CA file + verify=false' => [
         1013 => false
     ],
+    'Attempt 8: CAPATH /etc/ssl/certs + verify=false' => [
+        1009 => '/etc/ssl/certs',
+        1013 => false
+    ]
 ];
 
 foreach ($attempts as $label => $sslOptions) {
