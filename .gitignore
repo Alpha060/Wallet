@@ -4,3 +4,9 @@
 *.log
 .DS_Store
 Thumbs.db
+
+# Agent diagnostic and plan files
+implementation_plan.md
+CLAUDE.md
+AGENTS.md
+
