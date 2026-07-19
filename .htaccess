@@ -1,11 +1,13 @@
-# Root .htaccess - Redirects all traffic to the public/ folder for production Apache hosting (like Render)
+# Root .htaccess - Premium, clean Apache routing for public folder deployment
 RewriteEngine On
 
-# Allow Authorization header through to PHP
+# Allow Authorization header to pass through to PHP
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-# If request is not already pointing to public/ directory
-RewriteCond %{REQUEST_URI} !^/public/
-
-# Rewrite to public/ directory
+# 1. If the requested filename exists under the public/ folder, rewrite and serve it directly
+RewriteCond %{DOCUMENT_ROOT}/public/$1 -f
 RewriteRule ^(.*)$ public/$1 [L]
+
+# 2. Redirect all other requests to the front controller public/index.php
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteRule ^(.*)$ public/index.php [L]
