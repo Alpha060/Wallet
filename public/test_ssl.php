@@ -45,21 +45,25 @@ $password = $parsedUrl['pass'] ?? '';
 
 $dsn = "mysql:host=$host;port=$port;dbname=$dbName;charset=utf8mb4";
 
-// Print PDO mysqlnd SSL capabilities
-echo "--- PHP PDO / mysqlnd Capabilities ---\n";
-ob_start();
-phpinfo(INFO_MODULES);
-$info = ob_get_clean();
-if (preg_match_all('/(mysqlnd|pdo_mysql).*?SSL.*?\n/i', $info, $matches)) {
-    foreach ($matches[0] as $match) {
-        echo trim(strip_tags($match)) . "\n";
+// Print Client Library Info
+echo "--- Client Library Info ---\n";
+if (function_exists('mysqli_get_client_info')) {
+    echo "mysqli client version: " . mysqli_get_client_info() . "\n";
+}
+try {
+    // Check if we can get client version from a dummy PDO connection (e.g. sqlite if mysql fails, or just get module info)
+    ob_start();
+    phpinfo(INFO_MODULES);
+    $info = ob_get_clean();
+    if (preg_match('/Client API version => (.*?)\n/', $info, $m)) {
+        echo "PDO MySQL Client API version: " . trim(strip_tags($m[1])) . "\n";
     }
-} else {
-    echo "Could not find mysqlnd/pdo_mysql SSL info in phpinfo()\n";
+} catch (Exception $e) {
+    echo "Could not read PDO version: " . $e->getMessage() . "\n";
 }
 echo "\n";
 
-echo "--- mysqli connection tests for detailed OpenSSL errors ---\n";
+echo "--- mysqli connection tests ---\n";
 
 // Attempt 6: mysqli with local cert
 echo "Attempt 6: mysqli with local ca-cert.pem...\n";
@@ -78,23 +82,6 @@ if (!$link) {
     }
 }
 
-// Attempt 7: mysqli with system cert
-echo "Attempt 7: mysqli with system ca-certificates.crt...\n";
-$link = mysqli_init();
-if (!$link) {
-    echo "  mysqli_init failed\n\n";
-} else {
-    mysqli_ssl_set($link, NULL, NULL, '/etc/ssl/certs/ca-certificates.crt', NULL, NULL);
-    mysqli_options($link, MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, false);
-    
-    if (@mysqli_real_connect($link, $host, $user, $password, $dbName, $port)) {
-        echo "  --> SUCCESS!\n\n";
-        mysqli_close($link);
-    } else {
-        echo "  --> FAILED: " . mysqli_connect_error() . " (Code: " . mysqli_connect_errno() . ")\n\n";
-    }
-}
-
 echo "--- PDO connection tests ---\n";
 
 $attempts = [
@@ -102,24 +89,13 @@ $attempts = [
         1008 => dirname(__DIR__) . '/db/ca-cert.pem',
         1013 => false
     ],
-    'Attempt 2: System ca-certificates.crt + verify=false' => [
-        1008 => '/etc/ssl/certs/ca-certificates.crt',
-        1013 => false
+    'Attempt 9: Constant name strings (MYSQL_ATTR_SSL_CA) + verify=false' => [
+        'PDO::MYSQL_ATTR_SSL_CA' => dirname(__DIR__) . '/db/ca-cert.pem',
+        'PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT' => false
     ],
-    'Attempt 3: Local ca-cert.pem + verify=true' => [
-        1008 => dirname(__DIR__) . '/db/ca-cert.pem',
-        1013 => true
-    ],
-    'Attempt 4: System ca-certificates.crt + verify=true' => [
-        1008 => '/etc/ssl/certs/ca-certificates.crt',
-        1013 => true
-    ],
-    'Attempt 5: NO CA file + verify=false' => [
-        1013 => false
-    ],
-    'Attempt 8: CAPATH /etc/ssl/certs + verify=false' => [
-        1009 => '/etc/ssl/certs',
-        1013 => false
+    'Attempt 10: Using class constants + verify=false' => [
+        PDO::MYSQL_ATTR_SSL_CA => dirname(__DIR__) . '/db/ca-cert.pem',
+        PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false
     ]
 ];
 
@@ -130,8 +106,16 @@ foreach ($attempts as $label => $sslOptions) {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
     ];
+    
+    // Resolve constant keys if they are string names
     foreach ($sslOptions as $key => $val) {
-        $options[$key] = $val;
+        if ($key === 'PDO::MYSQL_ATTR_SSL_CA') {
+            $options[PDO::MYSQL_ATTR_SSL_CA] = $val;
+        } elseif ($key === 'PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT') {
+            $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = $val;
+        } else {
+            $options[$key] = $val;
+        }
     }
     
     try {
