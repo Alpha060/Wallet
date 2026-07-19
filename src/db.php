@@ -81,13 +81,19 @@ if ($scheme === 'mysql' || $scheme === 'mysqls') {
             }
         }
 
-        // Use integer codes for PDO constants to avoid PHP 8.5+ deprecation warnings:
-        // 1008 = PDO::MYSQL_ATTR_SSL_CA / Pdo\Mysql::ATTR_SSL_CA
-        // 1013 = PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT / Pdo\Mysql::ATTR_SSL_VERIFY_SERVER_CERT
-        if (file_exists($caPath)) {
-            $options[1008] = $caPath;
+        // Dynamically resolve constants to support PHP 8.2 and future PHP 8.5+ without warnings
+        if (class_exists('Pdo\\Mysql')) {
+            $sslCaKey = \Pdo\Mysql::ATTR_SSL_CA;
+            $sslVerifyKey = \Pdo\Mysql::ATTR_SSL_VERIFY_SERVER_CERT;
+        } else {
+            $sslCaKey = \PDO::MYSQL_ATTR_SSL_CA;
+            $sslVerifyKey = \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT;
         }
-        $options[1013] = false;
+
+        if (file_exists($caPath)) {
+            $options[$sslCaKey] = $caPath;
+        }
+        $options[$sslVerifyKey] = false;
     }
 } else if ($scheme === 'postgres' || $scheme === 'postgresql' || $scheme === 'pgsql') {
     $port = $port ?? 5432;
