@@ -1,16 +1,39 @@
 <?php
-// public/test_ssl.php - Web-based SSL connection diagnostic
-require_once dirname(__DIR__) . '/src/db.php';
-
+// public/test_ssl.php - Web-based SSL connection diagnostic (independent of db.php side effects)
 header('Content-Type: text/plain');
 echo "=== SSL CONNECTION DIAGNOSTIC (WEB) ===\n\n";
+
+// Manual environment loader helper
+function manualLoadEnv($path) {
+    if (!file_exists($path)) {
+        return;
+    }
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '' || strpos($line, '#') === 0) {
+            continue;
+        }
+        $parts = explode('=', $line, 2);
+        if (count($parts) === 2) {
+            $name = trim($parts[0]);
+            $value = trim($parts[1]);
+            $value = preg_replace('/^["\']|["\']$/', '', $value);
+            if (!getenv($name)) {
+                putenv("$name=$value");
+            }
+        }
+    }
+}
+
+manualLoadEnv(dirname(__DIR__) . '/.env.local');
 
 $dbUrl = getenv('DATABASE_URL');
 if (!$dbUrl) {
     die("DATABASE_URL not found.\n");
 }
 
-// Clean quotes if present
+// Clean quotes
 $dbUrl = preg_replace('/^["\']|["\']$/', '', trim($dbUrl));
 
 $parsedUrl = parse_url($dbUrl);
