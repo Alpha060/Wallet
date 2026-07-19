@@ -19,7 +19,7 @@ ob_start();
             <div style="color: var(--muted); font-size: 0.9rem; font-weight: 500; margin-top: 4px;"><?= htmlspecialchars($user['name'] ?: 'Cardholder'); ?></div>
         </div>
         <!-- Logo -->
-        <img src="/icons/aeropay-logo.png" alt="AeroPay Logo" style="width: 48px; height: 48px; object-fit: contain; opacity: 0.25;">
+        <img src="/images/aeropay-logo.png" alt="AeroPay Logo" style="width: 48px; height: 48px; object-fit: contain; opacity: 0.25;">
     </div>
     
     <div style="display: flex; gap: 12px; margin-top: 32px; position: relative; z-index: 1;">

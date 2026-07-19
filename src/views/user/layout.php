@@ -13,7 +13,7 @@ $activePage = $activePage ?? 'dashboard';
     <link rel="stylesheet" href="/app.css?v=2">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a0c">
-    <link rel="apple-touch-icon" href="/icons/aeropay-logo.png">
+    <link rel="apple-touch-icon" href="/images/aeropay-logo.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
@@ -62,7 +62,7 @@ $activePage = $activePage ?? 'dashboard';
         <!-- Desktop Sidebar -->
         <aside class="sidebar">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding: 4px;">
-                <img src="/icons/aeropay-logo.png" alt="AeroPay Logo" style="width: 32px; height: 32px; object-fit: contain;">
+                <img src="/images/aeropay-logo.png" alt="AeroPay Logo" style="width: 32px; height: 32px; object-fit: contain;">
                 <h2 style="font-weight: 800; font-size: 1.3rem; letter-spacing: -0.02em;">Aero<span style="color: var(--primary);">Pay</span></h2>
             </div>
 

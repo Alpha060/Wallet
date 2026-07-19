@@ -25,7 +25,7 @@ $csrfToken = generateCsrfToken();
     <link rel="stylesheet" href="/app.css?v=2">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a0c">
-    <link rel="apple-touch-icon" href="/icons/aeropay-logo.png">
+    <link rel="apple-touch-icon" href="/images/aeropay-logo.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Login - AeroPay</title>
@@ -152,7 +152,7 @@ $csrfToken = generateCsrfToken();
     <div class="login-wrapper">
         <div class="glass-panel login-card">
             <div class="logo-container">
-                <img src="/icons/aeropay-logo.png" alt="AeroPay Logo" style="width: 54px; height: 54px; object-fit: contain; margin: 0 auto 10px auto; display: block;">
+                <img src="/images/aeropay-logo.png" alt="AeroPay Logo" style="width: 54px; height: 54px; object-fit: contain; margin: 0 auto 10px auto; display: block;">
                 <h2>Aero<span class="text-gradient">Pay</span></h2>
                 <p style="color: var(--muted); font-size: 0.85rem; margin-top: 4px;">Your money, at the speed of air</p>
             </div>

@@ -3,7 +3,7 @@ const ASSETS = [
     '/',
     '/app.css?v=2',
     '/app.js?v=2',
-    '/icons/aeropay-logo.png'
+    '/images/aeropay-logo.png'
 ];
 
 self.addEventListener('install', (e) => {

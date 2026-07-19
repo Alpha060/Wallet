@@ -13,7 +13,7 @@ $csrfToken = generateCsrfToken();
     <link rel="stylesheet" href="/app.css?v=2">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a0c">
-    <link rel="apple-touch-icon" href="/icons/aeropay-logo.png">
+    <link rel="apple-touch-icon" href="/images/aeropay-logo.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
@@ -99,7 +99,7 @@ $csrfToken = generateCsrfToken();
     <div class="forgot-wrapper">
         <div class="glass-panel forgot-card">
             <div class="logo-container" style="text-align: center; margin-bottom: 24px;">
-                <img src="/icons/aeropay-logo.png" alt="AeroPay Logo" style="width: 54px; height: 54px; object-fit: contain; margin: 0 auto 10px auto; display: block;">
+                <img src="/images/aeropay-logo.png" alt="AeroPay Logo" style="width: 54px; height: 54px; object-fit: contain; margin: 0 auto 10px auto; display: block;">
                 <h2 style="font-size: 1.8rem; font-weight: 800; margin: 0;">Reset Password</h2>
             </div>
             
