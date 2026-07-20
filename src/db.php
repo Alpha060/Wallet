@@ -1,5 +1,5 @@
 <?php
-// db.php - Database connection via PDO for PostgreSQL
+// db.php - Database connection via PDO (MySQL / PostgreSQL / SQLite)
 
 // Load env variables from .env.local
 function loadEnv($path = null) {
@@ -41,7 +41,7 @@ if (!$dbUrl) {
 // Clean optional surrounding quotes if pasted literally in hosting panel
 $dbUrl = preg_replace('/^["\']|["\']$/', '', trim($dbUrl));
 
-// Parse MySQL URL
+// Parse Database URL
 $parsedUrl = parse_url($dbUrl);
 if (!$parsedUrl || !isset($parsedUrl['host'])) {
     die("Error: Invalid DATABASE_URL");
@@ -81,19 +81,35 @@ if ($scheme === 'mysql' || $scheme === 'mysqls') {
             }
         }
 
-        // Dynamically resolve constants to support PHP 8.2 and future PHP 8.5+ without warnings
-        if (class_exists('Pdo\\Mysql')) {
-            $sslCaKey = \Pdo\Mysql::ATTR_SSL_CA;
-            $sslVerifyKey = \Pdo\Mysql::ATTR_SSL_VERIFY_SERVER_CERT;
+        // Dynamically resolve SSL constants for PHP 8.2 through 8.5+
+        // PHP 8.4+ moved MySQL constants to Pdo\Mysql subclass; PHP 8.5 removed old PDO:: constants
+        $sslCaKey = null;
+        $sslVerifyKey = null;
+
+        if (class_exists('Pdo\\Mysql') && defined('Pdo\\Mysql::ATTR_SSL_CA')) {
+            // PHP 8.4+ / 8.5+ with new Pdo\Mysql subclass
+            $sslCaKey = constant('Pdo\\Mysql::ATTR_SSL_CA');
+            $sslVerifyKey = defined('Pdo\\Mysql::ATTR_SSL_VERIFY_SERVER_CERT')
+                ? constant('Pdo\\Mysql::ATTR_SSL_VERIFY_SERVER_CERT')
+                : null;
+        } elseif (defined('PDO::MYSQL_ATTR_SSL_CA')) {
+            // PHP 8.2 / 8.3 legacy constants
+            $sslCaKey = PDO::MYSQL_ATTR_SSL_CA;
+            $sslVerifyKey = defined('PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT')
+                ? PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT
+                : null;
         } else {
-            $sslCaKey = \PDO::MYSQL_ATTR_SSL_CA;
-            $sslVerifyKey = \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT;
+            // Ultimate fallback: use raw PDO MySQL driver attribute integer values
+            $sslCaKey = 1009;
+            $sslVerifyKey = 1014;
         }
 
-        if (file_exists($caPath)) {
+        if ($sslCaKey !== null && file_exists($caPath)) {
             $options[$sslCaKey] = $caPath;
         }
-        $options[$sslVerifyKey] = false;
+        if ($sslVerifyKey !== null) {
+            $options[$sslVerifyKey] = false;
+        }
     }
 } else if ($scheme === 'postgres' || $scheme === 'postgresql' || $scheme === 'pgsql') {
     $port = $port ?? 5432;

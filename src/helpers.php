@@ -107,7 +107,7 @@ function requireAuth() {
         $stmt = $pdo->prepare('SELECT is_active, deleted_at FROM users WHERE id = :id');
         $stmt->execute(['id' => $user['id']]);
         $dbUser = $stmt->fetch();
-        if (!$dbUser || $dbUser['is_active'] === false || !empty($dbUser['deleted_at'])) {
+        if (!$dbUser || !$dbUser['is_active'] || !empty($dbUser['deleted_at'])) {
             session_destroy();
             if (strpos($_SERVER['REQUEST_URI'], '/api/') !== false) {
                 jsonError('Your account has been deactivated. Please contact admin.', 403, 'ACCOUNT_DEACTIVATED');
@@ -143,102 +143,64 @@ function comparePassword($password, $hash) {
 }
 
 // Safe Image Resizing and Optimization using GD
-function optimizeUploadedImage($sourcePath, $destinationPath, $maxWidth = 1920, $maxHeight = 1920, $quality = 80) {
+function imageToBase64($sourcePath, $maxWidth = 800, $quality = 70) {
     if (!extension_loaded('gd')) {
-        // GD is not loaded, just copy the file directly as fallback
-        if ($sourcePath !== $destinationPath) {
-            copy($sourcePath, $destinationPath);
-        }
-        return true;
+        // Fallback if GD is missing: just base64 encode the raw file
+        $data = file_get_contents($sourcePath);
+        $mime = mime_content_type($sourcePath);
+        return 'data:' . $mime . ';base64,' . base64_encode($data);
     }
 
     list($width, $height, $type) = getimagesize($sourcePath);
-    if (!$width || !$height) {
-        return false;
-    }
+    if (!$width || !$height) return false;
 
-    // Determine scale ratio
-    $ratio = min($maxWidth / $width, $maxHeight / $height);
-    if ($ratio < 1) {
-        $newWidth = (int)round($width * $ratio);
-        $newHeight = (int)round($height * $ratio);
-    } else {
-        $newWidth = $width;
-        $newHeight = $height;
-    }
-
-    // Load original image
+    // Load source
+    $srcImage = null;
     switch ($type) {
-        case IMAGETYPE_JPEG:
-            $srcImage = imagecreatefromjpeg($sourcePath);
-            break;
-        case IMAGETYPE_PNG:
-            $srcImage = imagecreatefrompng($sourcePath);
-            break;
-        case IMAGETYPE_GIF:
-            $srcImage = imagecreatefromgif($sourcePath);
-            break;
+        case IMAGETYPE_JPEG: $srcImage = imagecreatefromjpeg($sourcePath); break;
+        case IMAGETYPE_PNG: $srcImage = imagecreatefrompng($sourcePath); break;
+        case IMAGETYPE_GIF: $srcImage = imagecreatefromgif($sourcePath); break;
         case IMAGETYPE_WEBP:
-            if (function_exists('imagecreatefromwebp')) {
-                $srcImage = imagecreatefromwebp($sourcePath);
-            } else {
-                $srcImage = false;
-            }
-            break;
-        default:
-            $srcImage = false;
+            if (function_exists('imagecreatefromwebp')) $srcImage = imagecreatefromwebp($sourcePath);
             break;
     }
 
     if (!$srcImage) {
-        if ($sourcePath !== $destinationPath) {
-            copy($sourcePath, $destinationPath);
-        }
-        return true;
+        // Unrecognized format by GD, fallback to raw base64
+        $data = file_get_contents($sourcePath);
+        $mime = mime_content_type($sourcePath);
+        return 'data:' . $mime . ';base64,' . base64_encode($data);
     }
 
-    // Create container and resize
+    // Calculate dimensions
+    $newWidth = $width;
+    $newHeight = $height;
+    if ($width > $maxWidth) {
+        $newWidth = $maxWidth;
+        $newHeight = (int)($height * ($maxWidth / $width));
+    }
+
+    // Resize
     $dstImage = imagecreatetruecolor($newWidth, $newHeight);
     
-    // Preserve transparency for PNG and GIF
-    if ($type === IMAGETYPE_PNG || $type === IMAGETYPE_GIF) {
-        imagealphablending($dstImage, false);
-        imagesavealpha($dstImage, true);
-        $transparent = imagecolorallocatealpha($dstImage, 255, 255, 255, 127);
-        imagefilledrectangle($dstImage, 0, 0, $newWidth, $newHeight, $transparent);
-    }
-
+    // Convert everything to JPEG to save space, fill transparent background with white
+    $white = imagecolorallocate($dstImage, 255, 255, 255);
+    imagefill($dstImage, 0, 0, $white);
+    
     imagecopyresampled($dstImage, $srcImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
 
-    // Save optimized image (always output to match input type if possible, otherwise JPEG fallback)
-    $success = false;
-    switch ($type) {
-        case IMAGETYPE_PNG:
-            $success = imagepng($dstImage, $destinationPath, 6); // PNG compression level 0-9
-            break;
-        case IMAGETYPE_GIF:
-            $success = imagegif($dstImage, $destinationPath);
-            break;
-        case IMAGETYPE_WEBP:
-            if (function_exists('imagewebp')) {
-                $success = imagewebp($dstImage, $destinationPath, $quality);
-            } else {
-                $success = imagejpeg($dstImage, $destinationPath, $quality);
-            }
-            break;
-        case IMAGETYPE_JPEG:
-        default:
-            $success = imagejpeg($dstImage, $destinationPath, $quality);
-            break;
-    }
+    // Capture output buffering
+    ob_start();
+    imagejpeg($dstImage, null, $quality);
+    $imageData = ob_get_clean();
 
     imagedestroy($srcImage);
     imagedestroy($dstImage);
 
-    return $success;
+    return 'data:image/jpeg;base64,' . base64_encode($imageData);
 }
 
-// Image upload and validate wrapper
+// Image upload and validate wrapper (now returns Base64 data URI instead of saving to disk)
 function handleUploadedFile($fileInputName, $targetDir = 'uploads') {
     if (!isset($_FILES[$fileInputName]) || $_FILES[$fileInputName]['error'] !== UPLOAD_ERR_OK) {
         return ['error' => 'No file uploaded or upload error occurred'];
@@ -260,23 +222,12 @@ function handleUploadedFile($fileInputName, $targetDir = 'uploads') {
         return ['error' => 'Invalid file format. Only JPEG, PNG, WEBP, and GIF are allowed.'];
     }
 
-    // Check target directory
-    $uploadsPath = dirname(__DIR__) . '/public/' . $targetDir;
-    if (!file_exists($uploadsPath)) {
-        mkdir($uploadsPath, 0755, true);
-    }
-
-    // Generate unique safe name
-    $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-    if (empty($ext)) {
-        $ext = ($mimetype === 'image/png') ? 'png' : (($mimetype === 'image/gif') ? 'gif' : 'jpg');
-    }
-    $filename = time() . '-' . bin2hex(random_bytes(8)) . '.' . strtolower($ext);
-    $destPath = $uploadsPath . '/' . $filename;
-
-    // Move and optimize
-    if (optimizeUploadedImage($tmpName, $destPath)) {
-        return ['filename' => $filename, 'path' => '/' . $targetDir . '/' . $filename];
+    // Compress and convert to Base64
+    $base64 = imageToBase64($tmpName);
+    
+    if ($base64) {
+        // Return the base64 string directly as the 'path'
+        return ['filename' => 'base64_image', 'path' => $base64];
     }
 
     return ['error' => 'Failed to process and optimize image'];

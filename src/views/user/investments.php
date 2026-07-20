@@ -25,11 +25,17 @@ ob_start();
 <div class="theater-mode" id="ad-theater" style="display: none;">
     <div class="video-container">
         <video id="ad-video-element" controls autoplay style="display: none;"></video>
-        <!-- Supports YouTube, Vimeo, Instagram, Facebook, Dailymotion, and any embeddable URL -->
-        <iframe id="ad-iframe-element" style="display: none;" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="no-referrer-when-downgrade" frameborder="0"></iframe>
+        <!-- Supports YouTube, Vimeo, Instagram, Facebook, TikTok, Dailymotion, Twitter/X, and any embeddable URL -->
+        <iframe id="ad-iframe-element" style="display: none;" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; accelerometer; gyroscope" allowfullscreen referrerpolicy="no-referrer-when-downgrade" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation" frameborder="0"></iframe>
 
         <div class="countdown-overlay">
             ⏱️ <span id="ad-time-left">120</span>s <?= __('Remaining') ?>
+        </div>
+        <!-- Fallback if iframe/video fails to load -->
+        <div id="ad-fallback" style="display: none; text-align: center; padding: 24px;">
+            <p style="color: var(--muted); margin-bottom: 12px; font-size: 0.9rem;"><?= __('Video cannot be embedded directly. Watch it in a new tab:') ?></p>
+            <a id="ad-fallback-link" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" style="display: inline-block; padding: 12px 24px; text-decoration: none; color: #000;"><?= __('🔗 Watch Video in New Tab') ?></a>
+            <p style="color: var(--muted); margin-top: 12px; font-size: 0.75rem;"><?= __('The countdown timer will continue running. Come back to claim your reward once complete.') ?></p>
         </div>
     </div>
     <div class="claim-button-container" id="ad-claim-box" style="display: none;">
@@ -47,13 +53,16 @@ ob_start();
     let activeInvestmentId = null;
     let activeAdClaimToken = null;
     let adCountdownTimer = null;
+    let iframeLoadTimeout = null;
 
     /**
      * Universal video URL → embeddable URL converter.
-     * Supports: YouTube, Vimeo, Dailymotion, Instagram, Facebook, Twitter/X, and direct video files.
-     * Returns { type: 'iframe' | 'video', url: string }
+     * Supports: YouTube (watch, shorts, live, embed), Vimeo, Dailymotion, Instagram (reel, p, tv),
+     * Facebook (video, reel, watch, fb.watch), Twitter/X (via twitframe), TikTok, and direct video files.
+     * Returns { type: 'iframe' | 'video' | 'fallback', url: string, originalUrl: string }
      */
     function getEmbedUrl(url) {
+        const originalUrl = url;
         try {
             const u = new URL(url);
             const host = u.hostname.replace('www.', '').replace('m.', '');
@@ -61,9 +70,10 @@ ob_start();
             // ── YouTube ──
             if (host === 'youtube.com' || host === 'youtu.be' || host === 'youtube-nocookie.com') {
                 let videoId = null;
+                let playlistId = null;
 
                 if (host === 'youtu.be') {
-                    videoId = u.pathname.slice(1).split('/')[0];
+                    videoId = u.pathname.slice(1).split('/')[0].split('?')[0];
                 } else if (u.pathname.startsWith('/embed/')) {
                     videoId = u.pathname.split('/embed/')[1]?.split(/[?/]/)[0];
                 } else if (u.pathname.startsWith('/shorts/')) {
@@ -73,66 +83,113 @@ ob_start();
                 } else if (u.searchParams.has('v')) {
                     videoId = u.searchParams.get('v');
                 }
+                
+                if (u.searchParams.has('list')) {
+                    playlistId = u.searchParams.get('list').trim();
+                }
 
                 if (videoId) {
-                    return { type: 'iframe', url: `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0` };
+                    videoId = videoId.trim();
+                    if (/^[a-zA-Z0-9_-]{10,12}$/.test(videoId)) {
+                        // If it's part of a playlist, include the list param
+                        const listParam = playlistId ? `&list=${playlistId}` : '';
+                        return { type: 'iframe', url: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1${listParam}`, originalUrl };
+                    }
+                } else if (playlistId) {
+                    // Pure playlist link (no specific video)
+                    return { type: 'iframe', url: `https://www.youtube-nocookie.com/embed/videoseries?list=${playlistId}&autoplay=1&rel=0&modestbranding=1`, originalUrl };
                 }
+
+                return { type: 'fallback', url: url, originalUrl };
             }
 
             // ── Vimeo ──
             if (host === 'vimeo.com' || host === 'player.vimeo.com') {
                 const vimeoId = u.pathname.match(/\/(\d+)/)?.[1];
                 if (vimeoId) {
-                    return { type: 'iframe', url: `https://player.vimeo.com/video/${vimeoId}?autoplay=1` };
+                    return { type: 'iframe', url: `https://player.vimeo.com/video/${vimeoId.trim()}?autoplay=1`, originalUrl };
                 }
+                return { type: 'fallback', url: url, originalUrl };
             }
 
             // ── Dailymotion ──
             if (host === 'dailymotion.com' || host === 'dai.ly') {
                 let dmId = null;
                 if (host === 'dai.ly') {
-                    dmId = u.pathname.slice(1);
+                    dmId = u.pathname.slice(1).split('?')[0];
                 } else {
                     dmId = u.pathname.match(/\/video\/([a-zA-Z0-9]+)/)?.[1];
+                    if (!dmId) dmId = u.pathname.match(/\/embed\/video\/([a-zA-Z0-9]+)/)?.[1];
                 }
                 if (dmId) {
-                    return { type: 'iframe', url: `https://www.dailymotion.com/embed/video/${dmId}?autoplay=1` };
+                    return { type: 'iframe', url: `https://www.dailymotion.com/embed/video/${dmId.trim()}?autoplay=1`, originalUrl };
                 }
+                return { type: 'fallback', url: url, originalUrl };
             }
 
-            // ── Instagram Reels / Posts ──
+            // ── Instagram Reels / Posts / TV ──
             if (host === 'instagram.com') {
                 const igMatch = u.pathname.match(/\/(reel|p|tv)\/([A-Za-z0-9_-]+)/);
                 if (igMatch) {
-                    return { type: 'iframe', url: `https://www.instagram.com/${igMatch[1]}/${igMatch[2]}/embed/` };
+                    // Use /embed/captioned/ for better cross-origin support in production
+                    return { type: 'iframe', url: `https://www.instagram.com/${igMatch[1]}/${igMatch[2]}/embed/captioned/`, originalUrl };
                 }
+                // Unsupported Instagram URL (stories, etc.) → open in new tab
+                return { type: 'fallback', url: url, originalUrl };
             }
 
-            // ── Facebook Videos ──
-            if (host === 'facebook.com' || host === 'fb.watch') {
-                return { type: 'iframe', url: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&autoplay=true` };
+            // ── Facebook Videos (including Reels, Watch, fb.watch) ──
+            if (host === 'facebook.com' || host === 'fb.watch' || host === 'fb.com') {
+                return { type: 'iframe', url: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&autoplay=true&show_text=false`, originalUrl };
+            }
+
+            // ── TikTok ──
+            if (host === 'tiktok.com' || host === 'vm.tiktok.com') {
+                const tiktokMatch = u.pathname.match(/\/video\/(\d+)/);
+                if (tiktokMatch) {
+                    return { type: 'iframe', url: `https://www.tiktok.com/embed/v2/${tiktokMatch[1]}`, originalUrl };
+                }
+                // Short TikTok URLs or unsupported formats → open in new tab
+                return { type: 'fallback', url: url, originalUrl };
             }
 
             // ── Twitter / X ──
             if (host === 'twitter.com' || host === 'x.com') {
-                // Twitter doesn't support iframe embeds well for video, open in iframe with noembed
-                return { type: 'iframe', url: url };
+                // Twitter doesn't support direct iframe embeds for video.
+                // Use twitframe.com as a public embed proxy.
+                return { type: 'iframe', url: `https://twitframe.com/show?url=${encodeURIComponent(url)}`, originalUrl };
             }
 
-            // ── Direct video files (.mp4, .webm, .ogg, .mov) ──
+            // ── Direct video files (.mp4, .webm, .ogg, .mov, .m4v, .avi) ──
             const ext = u.pathname.split('.').pop()?.toLowerCase();
             if (['mp4', 'webm', 'ogg', 'mov', 'm4v', 'avi'].includes(ext)) {
-                return { type: 'video', url: url };
+                return { type: 'video', url: url, originalUrl };
             }
 
             // ── Fallback: try iframe for any unknown URL ──
-            return { type: 'iframe', url: url };
+            return { type: 'iframe', url: url, originalUrl };
 
         } catch (e) {
-            // If URL parsing fails, try iframe as last resort
-            return { type: 'iframe', url: url };
+            // If URL parsing fails, offer as fallback link
+            return { type: 'fallback', url: url, originalUrl: url };
         }
     }
+
+    /**
+     * Show the "Watch in new tab" fallback UI when an embed cannot load.
+     */
+    function showFallbackLink(originalUrl) {
+        const iframeEl = document.getElementById('ad-iframe-element');
+        const videoEl = document.getElementById('ad-video-element');
+        const fallbackEl = document.getElementById('ad-fallback');
+        const fallbackLink = document.getElementById('ad-fallback-link');
+
+        iframeEl.style.display = 'none';
+        videoEl.style.display = 'none';
+        fallbackEl.style.display = 'block';
+        fallbackLink.href = originalUrl;
+    }
+
     async function fetchInvestments() {
         try {
             const [data, histData] = await Promise.all([
@@ -240,23 +297,61 @@ ob_start();
             const videoEl = document.getElementById('ad-video-element');
             const iframeEl = document.getElementById('ad-iframe-element');
             const claimBox = document.getElementById('ad-claim-box');
+            const fallbackEl = document.getElementById('ad-fallback');
 
             videoEl.style.display = 'none';
             iframeEl.style.display = 'none';
             claimBox.style.display = 'none';
+            fallbackEl.style.display = 'none';
             theater.style.display = 'flex';
+
+            // Clear any previous iframe load timeout
+            clearTimeout(iframeLoadTimeout);
 
             // Convert any video URL to an embeddable format
             const url = data.videoUrl;
             const embedInfo = getEmbedUrl(url);
 
-            if (embedInfo.type === 'iframe') {
+            if (embedInfo.type === 'fallback') {
+                // Immediately show fallback for URLs we know can't be embedded
+                showFallbackLink(embedInfo.originalUrl);
+            } else if (embedInfo.type === 'iframe') {
                 iframeEl.src = embedInfo.url;
                 iframeEl.style.display = 'block';
+
+                // Set a timeout: if iframe doesn't load in 8 seconds, show fallback
+                iframeLoadTimeout = setTimeout(() => {
+                    // Check if iframe loaded successfully by trying to access it
+                    try {
+                        // If the iframe is still essentially empty/blocked, show fallback
+                        const iframeDoc = iframeEl.contentDocument || iframeEl.contentWindow?.document;
+                        if (!iframeDoc || !iframeDoc.body || iframeDoc.body.innerHTML === '') {
+                            showFallbackLink(embedInfo.originalUrl);
+                        }
+                    } catch (e) {
+                        // Cross-origin iframe - this is expected for YouTube/Vimeo etc.
+                        // If we get a cross-origin error, it means the iframe DID load something
+                        // so we do nothing (embed is working)
+                    }
+                }, 8000);
+
+                // Also listen for iframe load errors
+                iframeEl.onerror = () => {
+                    clearTimeout(iframeLoadTimeout);
+                    showFallbackLink(embedInfo.originalUrl);
+                };
             } else {
                 videoEl.src = embedInfo.url;
                 videoEl.style.display = 'block';
-                videoEl.play().catch(() => {});
+                videoEl.play().catch(() => {
+                    // If autoplay fails (e.g., browser policy), show fallback
+                    showFallbackLink(embedInfo.originalUrl);
+                });
+
+                // Handle video load error
+                videoEl.onerror = () => {
+                    showFallbackLink(embedInfo.originalUrl);
+                };
             }
 
             // Start countdown timer
@@ -282,9 +377,11 @@ ob_start();
 
     function closeAdPlayer() {
         clearInterval(adCountdownTimer);
+        clearTimeout(iframeLoadTimeout);
         document.getElementById('ad-theater').style.display = 'none';
         document.getElementById('ad-video-element').src = '';
         document.getElementById('ad-iframe-element').src = '';
+        document.getElementById('ad-fallback').style.display = 'none';
         activeInvestmentId = null;
         activeAdClaimToken = null;
     }

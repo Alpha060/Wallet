@@ -73,7 +73,7 @@ try {
             jsonError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
         }
 
-        if ($user['is_active'] === false) {
+        if (!$user['is_active']) {
             jsonError('Account has been deactivated. Please contact admin to reactivate.', 403, 'ACCOUNT_DEACTIVATED');
         }
 
@@ -1228,7 +1228,7 @@ try {
                     // Toggle User Status (Suspend / Active)
                     $isActive = (bool)($input['isActive'] ?? true);
                     $stmt = $pdo->prepare('UPDATE users SET is_active = :isActive WHERE id = :id');
-                    $stmt->execute(['isActive' => $isActive ? 'TRUE' : 'FALSE', 'id' => $userId]);
+                    $stmt->execute(['isActive' => $isActive ? 1 : 0, 'id' => $userId]);
                     recordAdminAudit($currentAdmin['id'], $isActive ? 'user_activate' : 'user_suspend', 'users', $userId);
                     jsonResponse(['success' => true]);
                 }
