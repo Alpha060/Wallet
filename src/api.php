@@ -518,7 +518,7 @@ try {
             $stmt = $pdo->prepare('
                 SELECT ui.id, ui.product_id as "productId", ui.purchase_price as "purchasePrice", ui.purchased_at as "purchasedAt", ui.expires_at as "expiresAt",
                        p.name, p.image_url as "imageUrl", p.daily_reward_percent as "dailyRewardPercent", p.ad_watch_seconds as "adWatchSeconds",
-                       EXISTS(SELECT 1 FROM ad_watch_log awl WHERE awl.user_investment_id = ui.id AND awl.watched_at::date = CURRENT_DATE) as "watchedToday"
+                       EXISTS(SELECT 1 FROM ad_watch_log awl WHERE awl.user_investment_id = ui.id AND CAST(awl.watched_at AS DATE) = CURRENT_DATE) as "watchedToday"
                 FROM user_investments ui
                 JOIN products p ON ui.product_id = p.id
                 WHERE ui.user_id = :userId AND ui.is_sold = FALSE
@@ -1030,11 +1030,13 @@ try {
                 }
 
                 // Insert claim request
+                $claimRequestId = generateUUID();
                 $insStmt = $pdo->prepare('
-                    INSERT INTO bonus_claim_requests (user_id, bonus_id, amount, status)
-                    VALUES (:userId, :bonusId, :amount, \'pending\')
+                    INSERT INTO bonus_claim_requests (id, user_id, bonus_id, amount, status)
+                    VALUES (:id, :userId, :bonusId, :amount, \'pending\')
                 ');
                 $insStmt->execute([
+                    'id' => $claimRequestId,
                     'userId' => $currentUser['id'],
                     'bonusId' => $bonusId,
                     'amount' => $bonus['bonus_amount']
@@ -1293,8 +1295,8 @@ try {
                 if ($url !== '' && !preg_match('#^https?://#i', $url)) {
                     jsonError('URL must start with http:// or https://', 400);
                 }
-                $stmt = $pdo->prepare('INSERT INTO daily_ad (video_url, updated_by) VALUES (:url, :adminId)');
-                $stmt->execute(['url' => $url, 'adminId' => $currentAdmin['id']]);
+                $stmt = $pdo->prepare('INSERT INTO daily_ad (id, video_url, updated_by) VALUES (:id, :url, :adminId)');
+                $stmt->execute(['id' => generateUUID(), 'url' => $url, 'adminId' => $currentAdmin['id']]);
                 recordAdminAudit($currentAdmin['id'], 'global_ad_update', 'daily_ad', null, ['videoUrl' => $url]);
                 jsonResponse(['success' => true]);
             }
@@ -1316,7 +1318,7 @@ try {
                             $pdo->prepare('DELETE FROM product_ad_links WHERE product_id = :id')
                                 ->execute(['id' => $productId]);
 
-                            $ins = $pdo->prepare('INSERT INTO product_ad_links (product_id, day_number, video_url) VALUES (:prodId, :day, :url)');
+                            $ins = $pdo->prepare('INSERT INTO product_ad_links (id, product_id, day_number, video_url) VALUES (:id, :prodId, :day, :url)');
                             foreach ($links as $lnk) {
                                 $videoUrl = trim($lnk['videoUrl'] ?? '');
                                 // Accept any URL from YouTube, Instagram, Facebook, etc.
@@ -1324,6 +1326,7 @@ try {
                                     throw new Exception('URL must start with http:// or https://');
                                 }
                                 $ins->execute([
+                                    'id' => generateUUID(),
                                     'prodId' => $productId,
                                     'day' => (int)$lnk['dayNumber'],
                                     'url' => $videoUrl
