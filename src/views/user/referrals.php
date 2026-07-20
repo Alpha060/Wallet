@@ -3,8 +3,8 @@
 require_once dirname(dirname(dirname(__DIR__))) . '/src/helpers.php';
 $user = requireAuth();
 
-$title = "AeroPay - Referral Program";
-$description = "Invite your friends to earn 5% cash rewards on their deposits";
+$title = __("AeroPay - Referral Program");
+$description = __("Invite your friends to earn 5% cash rewards on their deposits");
 $activePage = "referrals";
 
 ob_start();
@@ -12,38 +12,38 @@ ob_start();
 
 <div class="bento-grid">
     <div class="glass-card">
-        <div style="color: var(--muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">My Referral Code</div>
+        <div style="color: var(--muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;"><?= __('My Referral Code') ?></div>
         <div style="display: flex; gap: 12px; align-items: center;">
             <h2 style="font-size: 1.8rem; font-weight: 800; font-family: monospace; color: var(--foreground);" id="my-referral-code">------</h2>
-            <button class="btn-secondary" onclick="copyReferralCode()" style="padding: 8px 12px; font-size: 0.8rem;">Copy</button>
+            <button class="btn-secondary" onclick="copyReferralCode()" style="padding: 8px 12px; font-size: 0.8rem;"><?= __('Copy') ?></button>
         </div>
     </div>
     <div class="glass-card">
-        <div style="color: var(--muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Claimable Commissions</div>
+        <div style="color: var(--muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;"><?= __('Claimable Commissions') ?></div>
         <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--success); margin-bottom: 8px;" id="claimable-amount">₹0.00</h2>
-        <button class="btn-primary" onclick="claimAllBonuses()" style="padding: 8px 16px; font-size: 0.8rem;" id="claim-all-btn">Claim All</button>
+        <button class="btn-primary" onclick="claimAllBonuses()" style="padding: 8px 16px; font-size: 0.8rem;" id="claim-all-btn"><?= __('Claim All') ?></button>
     </div>
     <div class="glass-card">
-        <div style="color: var(--muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Roadmap Progress</div>
-        <h3 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 6px; color: var(--foreground);" id="referral-roadmap-text">0 / 5 Referrals</h3>
+        <div style="color: var(--muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;"><?= __('Roadmap Progress') ?></div>
+        <h3 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 6px; color: var(--foreground);" id="referral-roadmap-text">0 / 5 <?= __('Referrals') ?></h3>
         <div class="progress-bar-container"><div class="progress-bar" id="referral-roadmap-bar" style="width: 0%;"></div></div>
-        <p style="font-size: 0.75rem; color: var(--muted); margin-top: 6px;">Invited members with active deposits</p>
+        <p style="font-size: 0.75rem; color: var(--muted); margin-top: 6px;"><?= __('Invited members with active deposits') ?></p>
     </div>
 </div>
 
 <div class="glass-panel" style="padding: 24px; margin-top: 32px; border: 1px solid var(--border);">
-    <h3 style="font-weight: 700; margin-bottom: 20px;">Referred Members</h3>
+    <h3 style="font-weight: 700; margin-bottom: 20px;"><?= __('Referred Members') ?></h3>
     <div id="referred-members" style="display: flex; flex-direction: column; gap: 12px;">
         <!-- Referred members dynamic loading -->
     </div>
 </div>
 
 <div class="glass-panel" style="padding: 24px; margin-top: 32px; border: 1px solid var(--border);">
-    <h3 style="font-weight: 700; margin-bottom: 20px;">Commissions Ledger</h3>
+    <h3 style="font-weight: 700; margin-bottom: 20px;"><?= __('Commissions Ledger') ?></h3>
     <div id="unclaimed-bonuses-list" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
         <!-- Unclaimed bonuses lists -->
     </div>
-    <h3 style="font-weight: 700; margin-bottom: 20px; border-top: 1px solid var(--border); padding-top: 20px; color: var(--foreground);">Commission Claims History</h3>
+    <h3 style="font-weight: 700; margin-bottom: 20px; border-top: 1px solid var(--border); padding-top: 20px; color: var(--foreground);"><?= __('Commission Claims History') ?></h3>
     <div id="claim-history-list" style="display: flex; flex-direction: column; gap: 12px;">
         <!-- Claims logs -->
     </div>
@@ -58,9 +58,9 @@ ob_start();
     function copyReferralCode() {
         const code = document.getElementById('my-referral-code').innerText;
         navigator.clipboard.writeText(code).then(() => {
-            Toast.show('Referral code copied to clipboard!', 'success');
+            Toast.show('<?= __('Referral code copied to clipboard!') ?>', 'success');
         }).catch(() => {
-            Toast.show('Failed to copy code', 'error');
+            Toast.show('<?= __('Failed to copy code') ?>', 'error');
         });
     }
 
@@ -76,7 +76,7 @@ ob_start();
             ]);
 
             document.getElementById('my-referral-code').innerText = codeData.referralCode;
-            document.getElementById('referral-roadmap-text').innerText = `${stats.confirmedReferrals} / ${stats.requiredReferrals} Referrals`;
+            document.getElementById('referral-roadmap-text').innerText = `${stats.confirmedReferrals} / ${stats.requiredReferrals} <?= __('Referrals') ?>`;
             
             const percent = stats.requiredReferrals > 0 ? Math.min(100, (stats.confirmedReferrals / stats.requiredReferrals) * 100) : 100;
             document.getElementById('referral-roadmap-bar').style.width = `${percent}%`;
@@ -90,18 +90,18 @@ ob_start();
             membersDiv.innerHTML = '';
 
             if (listData.referrals.length === 0) {
-                membersDiv.innerHTML = '<div style="text-align: center; color: var(--muted); font-size: 0.85rem; padding: 12px 0;">No members referred.</div>';
+                membersDiv.innerHTML = '<div style="text-align: center; color: var(--muted); font-size: 0.85rem; padding: 12px 0;"><?= __('No members referred.') ?></div>';
             }
 
             listData.referrals.forEach(m => {
                 const row = document.createElement('div');
                 row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border);';
                 const statusColor = m.isConfirmed ? 'var(--success)' : 'var(--muted)';
-                const statusText = m.isConfirmed ? '✓ Active Investor' : '⌛ Pending Deposit';
+                const statusText = m.isConfirmed ? '✓ <?= __('Active Investor') ?>' : '⌛ <?= __('Pending Deposit') ?>';
 
                 row.innerHTML = `
                     <div>
-                        <span style="font-weight: 700; font-size: 0.85rem; color: var(--foreground);">${m.name || 'Anonymous User'}</span>
+                        <span style="font-weight: 700; font-size: 0.85rem; color: var(--foreground);">${m.name || '<?= __('Anonymous User') ?>'}</span>
                         <span style="font-size: 0.7rem; color: var(--muted); display: block;">${m.email}</span>
                     </div>
                     <span style="font-size: 0.8rem; font-weight: 700; color: ${statusColor};">${statusText}</span>
@@ -114,7 +114,7 @@ ob_start();
             unclaimedList.innerHTML = '';
 
             if (unclaimedData.length === 0) {
-                unclaimedList.innerHTML = '<div style="text-align: center; color: var(--muted); font-size: 0.85rem; padding: 12px 0;">No commissions pending.</div>';
+                unclaimedList.innerHTML = '<div style="text-align: center; color: var(--muted); font-size: 0.85rem; padding: 12px 0;"><?= __('No commissions pending.') ?></div>';
             }
 
             unclaimedData.forEach(bonus => {
@@ -122,12 +122,12 @@ ob_start();
                 row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border);';
                 row.innerHTML = `
                     <div>
-                        <span style="font-weight: 700; font-size: 0.85rem; color: var(--foreground);">Bonus from ${bonus.referredUserName}</span>
-                        <span style="font-size: 0.7rem; color: var(--muted); display: block;">Deposit amount: ${formatRupees(bonus.depositAmount)}</span>
+                        <span style="font-weight: 700; font-size: 0.85rem; color: var(--foreground);"><?= __('Bonus from') ?> ${bonus.referredUserName}</span>
+                        <span style="font-size: 0.7rem; color: var(--muted); display: block;"><?= __('Deposit amount:') ?> ${formatRupees(bonus.depositAmount)}</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="font-weight: 850; color: var(--success);">${formatRupees(bonus.bonusAmount)}</span>
-                        <button class="btn-primary" onclick="claimBonus('${bonus.id}')" style="padding: 6px 12px; font-size: 0.75rem;">Claim</button>
+                        <button class="btn-primary" onclick="claimBonus('${bonus.id}')" style="padding: 6px 12px; font-size: 0.75rem;"><?= __('Claim') ?></button>
                     </div>
                 `;
                 unclaimedList.appendChild(row);
@@ -138,7 +138,7 @@ ob_start();
             claimsContainer.innerHTML = '';
 
             if (claimHistory.claims.length === 0) {
-                claimsContainer.innerHTML = '<div style="text-align: center; color: var(--muted); font-size: 0.85rem; padding: 12px 0;">No claims logged.</div>';
+                claimsContainer.innerHTML = '<div style="text-align: center; color: var(--muted); font-size: 0.85rem; padding: 12px 0;"><?= __('No claims logged.') ?></div>';
             }
 
             claimHistory.claims.forEach(c => {
@@ -149,9 +149,9 @@ ob_start();
 
                 row.innerHTML = `
                     <div>
-                        <span style="font-weight: 700; font-size: 0.85rem; color: var(--foreground);">Claim ID: ${c.id.substring(0, 8)}...</span>
-                        <span style="font-size: 0.7rem; color: var(--muted); display: block;">Submitted: ${date} | Status: <strong style="color: ${statusColor}; text-transform: capitalize;">${c.status}</strong></span>
-                        ${c.rejectionReason ? `<span style="font-size: 0.7rem; color: var(--destructive); display: block;">Reason: ${c.rejectionReason}</span>` : ''}
+                        <span style="font-weight: 700; font-size: 0.85rem; color: var(--foreground);"><?= __('Claim ID:') ?> ${c.id.substring(0, 8)}...</span>
+                        <span style="font-size: 0.7rem; color: var(--muted); display: block;"><?= __('Submitted:') ?> ${date} | <?= __('Status:') ?> <strong style="color: ${statusColor}; text-transform: capitalize;">${c.status}</strong></span>
+                        ${c.rejectionReason ? `<span style="font-size: 0.7rem; color: var(--destructive); display: block;"><?= __('Reason:') ?> ${c.rejectionReason}</span>` : ''}
                     </div>
                     <span style="font-weight: 850; color: var(--success);">${formatRupees(c.amount)}</span>
                 `;
@@ -165,7 +165,7 @@ ob_start();
     async function claimBonus(bonusId) {
         try {
             await apiRequest(`/api/referral-bonus/claim/${bonusId}`, { method: 'POST' });
-            Toast.show('Claim submitted! Awaiting admin approval.');
+            Toast.show('<?= __('Claim submitted! Awaiting admin approval.') ?>');
             fetchReferrals();
         } catch (err) {
             Toast.show(err.message, 'error');
@@ -181,7 +181,7 @@ ob_start();
                 count++;
             }
             if (count > 0) {
-                Toast.show(`Submitted ${count} claim requests!`);
+                Toast.show(`<?= __('Submitted %s claim requests!') ?>`.replace('%s', count));
                 fetchReferrals();
             }
         } catch (err) {

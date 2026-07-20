@@ -11,6 +11,7 @@ $activePage = $activePage ?? 'dashboard';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/app.css?v=2">
+    <script src="/app.js?v=2"></script>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a0c">
     <link rel="apple-touch-icon" href="/images/aeropay-logo.png">
@@ -61,14 +62,21 @@ $activePage = $activePage ?? 'dashboard';
             gap: 32px;
             margin-top: 24px;
         }
-        @media (max-width: 1024px) {
-            .split-layout {
-                grid-template-columns: 1fr;
-            }
-        }
         .pane-list-container {
             max-height: 60vh;
             overflow-y: auto;
+        }
+        @media (max-width: 1024px) {
+            .split-layout {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .pane-list-container {
+                max-height: 35vh;
+            }
+            .pane-details {
+                margin-bottom: 32px;
+            }
         }
         .pane-item {
             padding: 16px;
@@ -150,45 +158,45 @@ $activePage = $activePage ?? 'dashboard';
             </div>
 
              <nav class="sidebar-nav" style="display: flex; flex-direction: column; gap: 4px; flex: 1; margin-top: 0 !important;">
-                <div class="sidebar-category-header">Overview</div>
+                <div class="sidebar-category-header"><?= __('Overview') ?></div>
                 <a href="/admin" class="nav-link <?= $activePage === 'dashboard' ? 'active' : '' ?>">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar-icon"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
-                    Dashboard
+                    <?= __('Dashboard') ?>
                 </a>
 
-                <div class="sidebar-category-header">Operations</div>
+                <div class="sidebar-category-header"><?= __('Operations') ?></div>
                 <a href="/admin/deposits" class="nav-link <?= $activePage === 'deposits' ? 'active' : '' ?>">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar-icon"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
-                    Manage Deposits
+                    <?= __('Manage Deposits') ?>
                 </a>
                 <a href="/admin/withdrawals" class="nav-link <?= $activePage === 'withdrawals' ? 'active' : '' ?>">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar-icon"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-                    Manage Withdrawals
+                    <?= __('Manage Withdrawals') ?>
                 </a>
                 <a href="/admin/claims" class="nav-link <?= $activePage === 'claims' ? 'active' : '' ?>">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    Bonus Claims
+                    <?= __('Bonus Claims') ?>
                 </a>
 
-                <div class="sidebar-category-header">Management</div>
+                <div class="sidebar-category-header"><?= __('Management') ?></div>
                 <a href="/admin/users" class="nav-link <?= $activePage === 'users' ? 'active' : '' ?>">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar-icon"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/></svg>
-                    User Accounts
+                    <?= __('Manage Users') ?>
                 </a>
                 <a href="/admin/products" class="nav-link <?= $activePage === 'products' ? 'active' : '' ?>">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar-icon"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                    Yield Assets
+                    <?= __('Products') ?>
                 </a>
                 <a href="/admin/settings" class="nav-link <?= $activePage === 'settings' ? 'active' : '' ?>">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar-icon"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                    System Settings
+                    <?= __('System Settings') ?>
                 </a>
             </nav>
 
             <div style="margin-top: auto; display: flex; flex-direction: column;">
                 <button class="btn-secondary" id="logout-btn" style="width: 100%; border-color: rgba(239, 68, 68, 0.2); color: var(--destructive); display: flex; align-items: center; justify-content: center; gap: 8px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                    Logout
+                    <?= __('Logout') ?>
                 </button>
             </div>
         </aside>
@@ -202,7 +210,8 @@ $activePage = $activePage ?? 'dashboard';
                 <button id="mobile-menu-trigger" style="background: none; border: none; font-size: 1.5rem; color: var(--foreground); cursor: pointer;">☰</button>
                 <h3 style="font-weight: 700; margin: 0;"><?= htmlspecialchars($title ?? 'AdminPay') ?></h3>
             </div>
-            <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <button class="lang-toggle-btn" style="background: none; border: none; cursor: pointer; padding: 6px; color: var(--muted); display: flex; align-items: center; justify-content: center; border-radius: 50%; width: 36px; height: 36px; border: 1px solid var(--border);"></button>
                 <button class="theme-toggle-btn" id="theme-toggle-mobile" style="background: none; border: none; cursor: pointer; padding: 6px; color: var(--muted); display: flex; align-items: center; justify-content: center; border-radius: 50%; width: 36px; height: 36px; border: 1px solid var(--border);"></button>
                 
                 <!-- Mobile Dropdown Anchor -->
@@ -214,12 +223,12 @@ $activePage = $activePage ?? 'dashboard';
                     <div id="profile-dropdown-menu-mobile" style="display: none; position: absolute; top: 44px; right: 0; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 180px; z-index: 100; padding: 8px 0;">
                         <button onclick="openChangePasswordModal()" style="display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: none; text-align: left; padding: 10px 16px; color: var(--foreground); cursor: pointer; font-size: 0.85rem; font-weight: 600;" class="dropdown-item">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                            Change Password
+                            <?= __('Change Password') ?>
                         </button>
                         <hr style="border: 0; border-top: 1px solid var(--border); margin: 6px 0;">
                         <button class="dropdown-logout-btn" style="display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: none; text-align: left; padding: 10px 16px; color: var(--destructive); cursor: pointer; font-size: 0.85rem; font-weight: 600;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                            Logout
+                            <?= __('Logout') ?>
                         </button>
                     </div>
                 </div>
@@ -235,11 +244,12 @@ $activePage = $activePage ?? 'dashboard';
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
                     </button>
                     <div>
-                        <h1 style="font-weight: 800; font-size: 1.8rem; margin: 0; color: var(--foreground);"><?= htmlspecialchars($title ?? 'Dashboard') ?></h1>
-                        <p style="color: var(--muted); font-size: 0.85rem; margin-top: 4px; margin-bottom: 0;"><?= htmlspecialchars($description ?? 'Lifetime statistics and workload metrics') ?></p>
+                        <h1 style="font-weight: 800; font-size: 1.8rem; margin: 0; color: var(--foreground);"><?= htmlspecialchars(__($title ?? 'Dashboard')) ?></h1>
+                        <p style="color: var(--muted); font-size: 0.85rem; margin-top: 4px; margin-bottom: 0;"><?= htmlspecialchars(__($description ?? 'Lifetime statistics and workload metrics')) ?></p>
                     </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 16px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="lang-toggle-btn" style="background: none; border: none; cursor: pointer; padding: 8px; color: var(--muted); display: flex; align-items: center; justify-content: center; border-radius: 50%; width: 40px; height: 40px; border: 1px solid var(--border);"></button>
                     <button class="theme-toggle-btn" id="theme-toggle" style="background: none; border: none; cursor: pointer; padding: 8px; color: var(--muted); display: flex; align-items: center; justify-content: center; border-radius: 50%; width: 40px; height: 40px; border: 1px solid var(--border);"></button>
                     
                     <!-- Desktop Dropdown Anchor -->
@@ -251,12 +261,12 @@ $activePage = $activePage ?? 'dashboard';
                         <div id="profile-dropdown-menu" style="display: none; position: absolute; top: 48px; right: 0; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 180px; z-index: 100; padding: 8px 0;">
                             <button onclick="openChangePasswordModal()" style="display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: none; text-align: left; padding: 10px 16px; color: var(--foreground); cursor: pointer; font-size: 0.85rem; font-weight: 600;" class="dropdown-item">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                                Change Password
+                                <?= __('Change Password') ?>
                             </button>
                             <hr style="border: 0; border-top: 1px solid var(--border); margin: 6px 0;">
                             <button class="dropdown-logout-btn" style="display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: none; text-align: left; padding: 10px 16px; color: var(--destructive); cursor: pointer; font-size: 0.85rem; font-weight: 600;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                                Logout
+                                <?= __('Logout') ?>
                             </button>
                         </div>
                     </div>
@@ -309,7 +319,7 @@ $activePage = $activePage ?? 'dashboard';
         </div>
     </div>
 
-    <script src="/app.js?v=2"></script>
+    <!-- app.js loaded in head -->
     <script>
         // Sidebar & Backdrop
         const sidebar = document.querySelector('.sidebar');

@@ -4,37 +4,37 @@ require_once dirname(dirname(dirname(__DIR__))) . '/src/helpers.php';
 $user = requireAdmin();
 $csrfToken = generateCsrfToken();
 
-$title = "Dashboard";
-$description = "Lifetime statistics and pending transaction queues";
+$title = __("Dashboard");
+$description = __("Lifetime statistics and pending transaction queues");
 $activePage = "dashboard";
 
 ob_start();
 ?>
 <div class="bento-grid">
     <div class="glass-card" id="card-pending-deposits">
-        <div style="color: var(--muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Pending Deposits</div>
+        <div style="color: var(--muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;"><?= __('Pending Deposits') ?></div>
         <h2 style="font-size: 2.2rem; font-weight: 800; color: var(--foreground);" id="stats-pending-deposits">0</h2>
-        <a href="/admin/deposits" class="btn-secondary" style="margin-top: 12px; padding: 6px 12px; font-size: 0.75rem; text-decoration: none;">Manage Queue</a>
+        <a href="/admin/deposits" class="btn-secondary" style="margin-top: 12px; padding: 6px 12px; font-size: 0.75rem; text-decoration: none;"><?= __('Manage Queue') ?></a>
     </div>
     <div class="glass-card" id="card-pending-withdrawals">
-        <div style="color: var(--muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Pending Withdrawals</div>
+        <div style="color: var(--muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;"><?= __('Pending Withdrawals') ?></div>
         <h2 style="font-size: 2.2rem; font-weight: 800; color: var(--foreground);" id="stats-pending-withdrawals">0</h2>
-        <a href="/admin/withdrawals" class="btn-secondary" style="margin-top: 12px; padding: 6px 12px; font-size: 0.75rem; text-decoration: none;">Manage Queue</a>
+        <a href="/admin/withdrawals" class="btn-secondary" style="margin-top: 12px; padding: 6px 12px; font-size: 0.75rem; text-decoration: none;"><?= __('Manage Queue') ?></a>
     </div>
     <div class="glass-card" id="card-pending-claims">
-        <div style="color: var(--muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Pending Bonus Claims</div>
+        <div style="color: var(--muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;"><?= __('Pending Bonus Claims') ?></div>
         <h2 style="font-size: 2.2rem; font-weight: 800; color: var(--foreground);" id="stats-pending-claims">0</h2>
-        <a href="/admin/claims" class="btn-secondary" style="margin-top: 12px; padding: 6px 12px; font-size: 0.75rem; text-decoration: none;">Manage Queue</a>
+        <a href="/admin/claims" class="btn-secondary" style="margin-top: 12px; padding: 6px 12px; font-size: 0.75rem; text-decoration: none;"><?= __('Manage Queue') ?></a>
     </div>
 </div>
 
 <div class="bento-grid" style="margin-top: 32px;">
     <div class="glass-card">
-        <div style="color: var(--muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Total Approved Deposits</div>
+        <div style="color: var(--muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;"><?= __('Total Approved Deposits') ?></div>
         <h2 style="font-size: 2.2rem; font-weight: 800; color: var(--success);" id="stats-approved-deposits">₹0.00</h2>
     </div>
     <div class="glass-card">
-        <div style="color: var(--muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Total Completed Withdrawals</div>
+        <div style="color: var(--muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;"><?= __('Total Completed Withdrawals') ?></div>
         <h2 style="font-size: 2.2rem; font-weight: 800; color: var(--destructive);" id="stats-completed-withdrawals">₹0.00</h2>
     </div>
 </div>
@@ -60,7 +60,7 @@ ob_start();
             document.getElementById('card-pending-withdrawals').classList.toggle('pulse', data.pendingWithdrawalsCount > 0);
             document.getElementById('card-pending-claims').classList.toggle('pulse', data.pendingClaimsCount > 0);
         } catch (err) {
-            Toast.show('Failed to fetch statistics', 'error');
+            Toast.show('<?= __('Failed to fetch statistics') ?>', 'error');
         }
     }
 

@@ -16,6 +16,28 @@ function initSession() {
     }
 }
 
+// Global dictionary for translation
+$langDict = [];
+
+function __($key) {
+    global $langDict;
+    // Load dictionary once
+    if (empty($langDict)) {
+        if (file_exists(__DIR__ . '/lang.php')) {
+            $langDict = require __DIR__ . '/lang.php';
+        }
+    }
+    
+    // Check user language preference
+    $lang = $_COOKIE['lang'] ?? 'en';
+    
+    if ($lang === 'hi' && isset($langDict[$key])) {
+        return $langDict[$key];
+    }
+    
+    return $key;
+}
+
 // Response helpers
 function jsonResponse($data, $statusCode = 200) {
     http_response_code($statusCode);

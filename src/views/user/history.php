@@ -3,8 +3,8 @@
 require_once dirname(dirname(dirname(__DIR__))) . '/src/helpers.php';
 $user = requireAuth();
 
-$title = "AeroPay - History";
-$description = "Track deposits, withdrawals, yield earnings, and sales";
+$title = __("AeroPay - History");
+$description = __("Track deposits, withdrawals, yield earnings, and sales");
 $activePage = "history";
 
 ob_start();
@@ -12,28 +12,28 @@ ob_start();
 
 <div class="glass-panel" style="padding: 24px; margin-bottom: 24px; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; border: 1px solid var(--border);">
     <div>
-        <label class="form-label" style="margin-bottom: 4px;">Type Filter</label>
+        <label class="form-label" style="margin-bottom: 4px;"><?= __('Type Filter') ?></label>
         <select class="form-input" id="history-filter" style="width: 160px; padding: 8px 12px;">
-            <option value="all">All Transactions</option>
-            <option value="deposit">Deposits</option>
-            <option value="withdrawal">Withdrawals</option>
-            <option value="buy">Asset Purchases</option>
-            <option value="sell">Asset Sells</option>
-            <option value="reward">Daily Rewards</option>
+            <option value="all"><?= __('All Transactions') ?></option>
+            <option value="deposit"><?= __('Deposits') ?></option>
+            <option value="withdrawal"><?= __('Withdrawals') ?></option>
+            <option value="buy"><?= __('Asset Purchases') ?></option>
+            <option value="sell"><?= __('Asset Sells') ?></option>
+            <option value="reward"><?= __('Daily Rewards') ?></option>
         </select>
     </div>
 
     <div>
-        <label class="form-label" style="margin-bottom: 4px;">Start Date</label>
+        <label class="form-label" style="margin-bottom: 4px;"><?= __('Start Date') ?></label>
         <input class="form-input" type="date" id="history-start" style="width: 160px; padding: 8px 12px;">
     </div>
 
     <div>
-        <label class="form-label" style="margin-bottom: 4px;">End Date</label>
+        <label class="form-label" style="margin-bottom: 4px;"><?= __('End Date') ?></label>
         <input class="form-input" type="date" id="history-end" style="width: 160px; padding: 8px 12px;">
     </div>
 
-    <button class="btn-primary" onclick="fetchHistory()" style="margin-top: 20px; padding: 10px 20px;">Apply Filters</button>
+    <button class="btn-primary" onclick="fetchHistory()" style="margin-top: 20px; padding: 10px 20px;"><?= __('Apply Filters') ?></button>
 </div>
 
 <div class="glass-panel" style="padding: 24px; border: 1px solid var(--border);">
@@ -42,9 +42,9 @@ ob_start();
     </div>
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px;">
-        <button class="btn-secondary" id="history-prev-btn" onclick="prevHistoryPage()" style="padding: 8px 16px;">Previous</button>
-        <span id="history-page-indicator" style="font-weight: 700; color: var(--foreground);">Page 1 of 1</span>
-        <button class="btn-secondary" id="history-next-btn" onclick="nextHistoryPage()" style="padding: 8px 16px;">Next</button>
+        <button class="btn-secondary" id="history-prev-btn" onclick="prevHistoryPage()" style="padding: 8px 16px;"><?= __('Previous') ?></button>
+        <span id="history-page-indicator" style="font-weight: 700; color: var(--foreground);"><?= __('Page 1 of 1') ?></span>
+        <button class="btn-secondary" id="history-next-btn" onclick="nextHistoryPage()" style="padding: 8px 16px;"><?= __('Next') ?></button>
     </div>
 </div>
 
@@ -106,7 +106,7 @@ ob_start();
 
                 const limit = 10;
                 const totalPages = Math.ceil(merged.length / limit) || 1;
-                document.getElementById('history-page-indicator').innerText = `Page ${historyPage} of ${totalPages}`;
+                document.getElementById('history-page-indicator').innerText = `<?= __('Page') ?> ${historyPage} <?= __('of') ?> ${totalPages}`;
                 document.getElementById('history-prev-btn').disabled = (historyPage === 1);
                 document.getElementById('history-next-btn').disabled = (historyPage === totalPages);
 
@@ -124,7 +124,7 @@ ob_start();
                     list = list.filter(x => new Date(x.createdAt) <= eDate);
                 }
 
-                document.getElementById('history-page-indicator').innerText = `Page ${historyPage} of ${data.totalPages || 1}`;
+                document.getElementById('history-page-indicator').innerText = `<?= __('Page') ?> ${historyPage} <?= __('of') ?> ${data.totalPages || 1}`;
                 document.getElementById('history-prev-btn').disabled = (historyPage === 1);
                 document.getElementById('history-next-btn').disabled = (historyPage === (data.totalPages || 1));
                 
@@ -140,7 +140,7 @@ ob_start();
         container.innerHTML = '';
 
         if (arr.length === 0) {
-            container.innerHTML = '<div style="text-align: center; color: var(--muted); padding: 32px 0;">No matching transactions found.</div>';
+            container.innerHTML = '<div style="text-align: center; color: var(--muted); padding: 32px 0;"><?= __('No matching transactions found.') ?></div>';
             return;
         }
 
@@ -155,14 +155,14 @@ ob_start();
             
             let label = t.type;
             if (t.name) {
-                label = t.type === 'buy' ? `Purchase ${t.name}` : (t.type === 'sell' ? `Early Refund ${t.name}` : `Reward: ${t.name}`);
+                label = t.type === 'buy' ? `<?= __('Purchase') ?> ${t.name}` : (t.type === 'sell' ? `<?= __('Early Refund') ?> ${t.name}` : `<?= __('Reward:') ?> ${t.name}`);
             }
 
             row.innerHTML = `
                 <div>
                     <span style="font-weight: 700; font-size: 0.95rem; text-transform: capitalize; color: var(--foreground);">${label}</span>
-                    <span style="font-size: 0.75rem; color: var(--muted); display: block;">${date} | Status: <strong style="text-transform: capitalize;">${t.status}</strong></span>
-                    ${t.rejectionReason ? `<span style="font-size: 0.7rem; color: var(--destructive); display: block;">Reason: ${t.rejectionReason}</span>` : ''}
+                    <span style="font-size: 0.75rem; color: var(--muted); display: block;">${date} | <?= __('Status:') ?> <strong style="text-transform: capitalize;">${t.status}</strong></span>
+                    ${t.rejectionReason ? `<span style="font-size: 0.7rem; color: var(--destructive); display: block;"><?= __('Reason:') ?> ${t.rejectionReason}</span>` : ''}
                 </div>
                 <span style="font-weight: 850; font-size: 1.1rem; color: ${color};">${prefix}${formatRupees(t.amount)}</span>
             `;

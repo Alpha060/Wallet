@@ -3,8 +3,8 @@
 require_once dirname(dirname(dirname(__DIR__))) . '/src/helpers.php';
 $user = requireAuth();
 
-$title = "AeroPay - Withdraw Funds";
-$description = "Cash out your balance to bank or UPI";
+$title = __("AeroPay - Withdraw Funds");
+$description = __("Cash out your balance to bank or UPI");
 $activePage = "withdraw";
 
 ob_start();
@@ -12,7 +12,7 @@ ob_start();
 
 <div class="glass-panel" style="padding: 36px; max-width: 600px; border: 1px solid var(--border);">
     <div style="margin-bottom: 24px; font-weight: 700; font-size: 1.1rem; color: var(--foreground);">
-        Available Balance: <span style="color: var(--primary);" id="withdraw-available-balance">₹0.00</span>
+        <?= __('Available Balance:') ?> <span style="color: var(--primary);" id="withdraw-available-balance">₹0.00</span>
     </div>
 
     <div id="withdrawal-referral-warning" style="display: none; background: var(--destructive-glow); border: 1px solid rgba(239, 68, 68, 0.15); color: var(--destructive); padding: 16px; border-radius: var(--radius-sm); margin-bottom: 24px; font-size: 0.85rem; font-weight: 600;">
@@ -21,49 +21,49 @@ ob_start();
 
     <form id="withdrawal-form">
         <div class="form-group">
-            <label class="form-label">Withdrawal Amount (Rupees)</label>
+            <label class="form-label"><?= __('Withdrawal Amount (Rupees)') ?></label>
             <input class="form-input" type="text" id="withdraw-amount-input" name="amount" placeholder="e.g. 500" required>
         </div>
 
         <div class="form-group">
-            <label class="form-label">Payment Type</label>
+            <label class="form-label"><?= __('Payment Type') ?></label>
             <div style="display: flex; gap: 12px; margin-bottom: 16px;">
                 <label style="flex: 1; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--foreground);">
-                    <input type="radio" name="withdrawMethod" value="upi" checked onclick="toggleWithdrawMethod('upi')"> UPI
+                    <input type="radio" name="withdrawMethod" value="upi" checked onclick="toggleWithdrawMethod('upi')"> <?= __('UPI') ?>
                 </label>
                 <label style="flex: 1; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--foreground);">
-                    <input type="radio" name="withdrawMethod" value="bank" onclick="toggleWithdrawMethod('bank')"> Bank Account
+                    <input type="radio" name="withdrawMethod" value="bank" onclick="toggleWithdrawMethod('bank')"> <?= __('Bank Account') ?>
                 </label>
             </div>
         </div>
 
         <!-- UPI Field -->
         <div id="withdraw-upi-fields" class="form-group">
-            <label class="form-label">UPI ID</label>
+            <label class="form-label"><?= __('UPI ID') ?></label>
             <input class="form-input" type="text" id="withdraw-upi-id" placeholder="yourname@bank">
         </div>
 
         <!-- Bank Fields -->
         <div id="withdraw-bank-fields" style="display: none;">
             <div class="form-group">
-                <label class="form-label">Account Holder Name</label>
+                <label class="form-label"><?= __('Account Holder Name') ?></label>
                 <input class="form-input" type="text" id="withdraw-acc-name" placeholder="John Doe">
             </div>
             <div class="form-group">
-                <label class="form-label">Account Number</label>
+                <label class="form-label"><?= __('Account Number') ?></label>
                 <input class="form-input" type="text" id="withdraw-acc-num" placeholder="1234567890">
             </div>
             <div class="form-group">
-                <label class="form-label">IFSC Code</label>
+                <label class="form-label"><?= __('IFSC Code') ?></label>
                 <input class="form-input" type="text" id="withdraw-ifsc" placeholder="ABCD0123456">
             </div>
         </div>
 
         <div style="margin-top: 32px;">
-            <label class="form-label" style="text-align: center; margin-bottom: 12px; display: block;">Swipe to confirm withdrawal</label>
+            <label class="form-label" style="text-align: center; margin-bottom: 12px; display: block;"><?= __('Swipe to confirm withdrawal') ?></label>
             <div class="swipe-container" id="withdraw-swipe">
                 <div class="swipe-bg"></div>
-                <div class="swipe-text">Swipe Right to Cashout</div>
+                <div class="swipe-text"><?= __('Swipe Right to Cashout') ?></div>
                 <div class="swipe-handle">➔</div>
             </div>
         </div>
@@ -94,7 +94,7 @@ ob_start();
             
             if (refStats.confirmedReferrals < refStats.requiredReferrals) {
                 const needed = refStats.requiredReferrals - refStats.confirmedReferrals;
-                warningDiv.innerText = `⚠️ Requirement: You must invite ${refStats.requiredReferrals} friends with active deposits to unlock withdrawals. You currently have ${refStats.confirmedReferrals} (${needed} remaining).`;
+                warningDiv.innerText = `⚠️ <?= __('Requirement: You must invite %s friends with active deposits to unlock withdrawals. You currently have %s (%s remaining).') ?>`.replace('%s', refStats.requiredReferrals).replace('%s', refStats.confirmedReferrals).replace('%s', needed);
                 warningDiv.style.display = 'block';
             } else {
                 warningDiv.style.display = 'none';
@@ -128,7 +128,7 @@ ob_start();
     SwipeSlider.init('withdraw-swipe', async () => {
         const amount = parseFloat(document.getElementById('withdraw-amount-input').value);
         if (isNaN(amount) || amount <= 0) {
-            Toast.show('Please enter a valid amount', 'error');
+            Toast.show('<?= __('Please enter a valid amount') ?>', 'error');
             SwipeSlider.reset();
             return;
         }
@@ -139,7 +139,7 @@ ob_start();
         if (method === 'upi') {
             const upiVal = document.getElementById('withdraw-upi-id').value.trim();
             if (!upiVal) {
-                Toast.show('UPI ID is required', 'error');
+                Toast.show('<?= __('UPI ID is required') ?>', 'error');
                 SwipeSlider.reset();
                 return;
             }
@@ -150,7 +150,7 @@ ob_start();
             const ifsc = document.getElementById('withdraw-ifsc').value.trim().toUpperCase();
 
             if (!name || !num || !ifsc) {
-                Toast.show('All bank account details are required', 'error');
+                Toast.show('<?= __('All bank account details are required') ?>', 'error');
                 SwipeSlider.reset();
                 return;
             }
@@ -166,7 +166,7 @@ ob_start();
                 }
             });
 
-            Toast.show('Withdrawal request submitted successfully!');
+            Toast.show('<?= __('Withdrawal request submitted successfully!') ?>');
             document.getElementById('withdraw-amount-input').value = '';
             SwipeSlider.reset();
             window.location.href = '/dashboard';

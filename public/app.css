@@ -668,18 +668,223 @@ body {
         position: static;
     }
     .bento-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr;
         gap: 16px;
     }
     .marketplace-grid {
         grid-template-columns: 1fr;
         gap: 16px;
     }
+    
+    /* Mobile Spacing Optimizations */
+    .glass-panel {
+        padding: 16px !important;
+    }
+    .modal-content {
+        padding: 24px !important;
+        width: 95% !important;
+        max-width: 100% !important;
+    }
+    .main-content {
+        padding: 16px 12px;
+    }
+}
+/* ─── Responsive Utilities ─── */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
 }
 
-@media (max-width: 480px) {
-    .bento-grid {
-        grid-template-columns: 1fr 1fr;
+/* ─── Step Wizard ─── */
+.step-wizard {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 28px;
+    position: relative;
+}
+
+.wizard-step {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--muted-light);
+    background: var(--secondary);
+    border: 2px solid var(--border);
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wizard-step.active {
+    background: var(--primary);
+    color: #000;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-glow), 0 4px 12px var(--primary-glow);
+    transform: scale(1.08);
+}
+
+.wizard-step.complete {
+    background: var(--success);
+    color: #fff;
+    border-color: var(--success);
+    box-shadow: 0 0 0 4px var(--success-glow);
+}
+
+.wizard-connector {
+    width: 48px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    transition: background 0.3s ease;
+    z-index: 1;
+}
+
+.wizard-connector.active {
+    background: var(--success);
+}
+
+/* ─── File Upload Dropzone ─── */
+.upload-dropzone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--secondary);
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-dropzone:hover {
+    border-color: var(--primary);
+    background: var(--primary-glow);
+}
+
+.upload-dropzone.has-file {
+    border-color: var(--success);
+    background: var(--success-glow);
+}
+
+.upload-dropzone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.upload-dropzone-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+    color: var(--muted);
+    transition: color 0.3s ease;
+}
+
+.upload-dropzone:hover .upload-dropzone-icon {
+    color: var(--primary);
+}
+
+.upload-dropzone.has-file .upload-dropzone-icon {
+    color: var(--success);
+}
+
+.upload-dropzone-text {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.upload-dropzone-hint {
+    font-size: 0.75rem;
+    color: var(--muted-light);
+    margin-top: 4px;
+}
+
+/* ─── Deposit Amount Summary ─── */
+.deposit-summary-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--primary-glow);
+    border: 1px solid rgba(217, 119, 6, 0.2);
+    border-radius: var(--radius-sm);
+    margin-bottom: 20px;
+}
+
+.dark .deposit-summary-card {
+    background: rgba(245, 158, 11, 0.08);
+    border-color: rgba(245, 158, 11, 0.15);
+}
+
+.deposit-summary-card .amount-display {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: -0.02em;
+}
+
+/* ─── Payment Method Tabs ─── */
+.pm-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.pm-tab {
+    padding: 8px 18px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: var(--secondary);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pm-tab:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.pm-tab.active {
+    background: var(--primary);
+    color: #000;
+    border-color: var(--primary);
+    box-shadow: 0 2px 8px var(--primary-glow);
+}
+
+/* ─── Spinner Animation ─── */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ─── Settings Panel Layout ─── */
+.tier-form-grid {
+    padding: 16px;
+    display: grid;
+    grid-template-columns: 120px 1fr 1fr 120px;
+    gap: 16px;
+    align-items: center;
+    border: 1px solid var(--border);
+}
+
+@media (max-width: 768px) {
+    .tier-form-grid {
+        grid-template-columns: 1fr;
         gap: 12px;
     }
 }

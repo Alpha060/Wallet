@@ -4,8 +4,8 @@ require_once dirname(dirname(dirname(__DIR__))) . '/src/helpers.php';
 $user = requireAdmin();
 $csrfToken = generateCsrfToken();
 
-$title = "System Configuration";
-$description = "Configure receiving gateway codes, primary numbers and payout limits";
+$title = __("System Configuration");
+$description = __("Configure receiving gateway codes, primary numbers and payout limits");
 $activePage = "settings";
 
 ob_start();
@@ -13,36 +13,36 @@ ob_start();
 <div class="bento-grid">
     <!-- Primary QR Code -->
     <form id="settings-qr-form" class="glass-card" style="display: flex; flex-direction: column; gap: 16px; border: 1px solid var(--border);">
-        <h3 style="font-weight: 700; color: var(--foreground);">Receiving QR Code</h3>
+        <h3 style="font-weight: 700; color: var(--foreground);"><?= __('Receiving QR Code') ?></h3>
         <img id="settings-qr-preview" src="" alt="System QR" style="width: 150px; height: 150px; object-fit: contain; align-self: center; border-radius: var(--radius-sm); border: 1px solid var(--border); display: none;">
         <div class="form-group">
-            <label class="form-label">Upload New QR Code Image</label>
+            <label class="form-label"><?= __('Upload New QR Code Image') ?></label>
             <input class="form-input" type="file" name="qrCode" required accept="image/*">
         </div>
-        <button type="submit" class="btn-primary" style="margin-top: auto; color: #000000;">Upload QR Code</button>
+        <button type="submit" class="btn-primary" style="margin-top: auto; color: #000000;"><?= __('Upload QR Code') ?></button>
     </form>
 
     <!-- Core Config Form -->
     <form id="settings-config-form" class="glass-card" style="display: flex; flex-direction: column; gap: 16px; border: 1px solid var(--border);">
-        <h3 style="font-weight: 700; color: var(--foreground);">Global Settings</h3>
+        <h3 style="font-weight: 700; color: var(--foreground);"><?= __('Global Settings') ?></h3>
         <div class="form-group">
-            <label class="form-label">Primary UPI ID</label>
+            <label class="form-label"><?= __('Primary UPI ID') ?></label>
             <input class="form-input" type="text" id="settings-upi-id" name="upiId" placeholder="merchant@bank">
         </div>
         <div class="form-group">
-            <label class="form-label">Backup Global Video Ad URL</label>
-            <input class="form-input" type="url" id="settings-global-ad" name="videoUrl" placeholder="https://example.com/ad.mp4">
+            <label class="form-label"><?= __('Backup Global Video Ad URL') ?></label>
+            <input class="form-input" type="text" id="settings-global-ad" name="videoUrl" placeholder="YouTube, Instagram, Facebook or any video URL">
         </div>
         <div class="form-group">
-            <label class="form-label">Required Referrals Count (Withdrawals)</label>
+            <label class="form-label"><?= __('Required Referrals Count (Withdrawals)') ?></label>
             <input class="form-input" type="number" id="settings-req-referrals" name="requiredReferrals" min="0" placeholder="5">
         </div>
-        <button type="submit" class="btn-primary" style="margin-top: auto; color: #000000;">Save Configuration</button>
+        <button type="submit" class="btn-primary" style="margin-top: auto; color: #000000;"><?= __('Save Configuration') ?></button>
     </form>
 
     <!-- Payment Tiers Settings -->
     <div class="glass-card" style="grid-column: 1/-1; border: 1px solid var(--border);">
-        <h3 style="font-weight: 700; margin-bottom: 16px; color: var(--foreground);">Active Deposit Tiers (Gold, Diamond, Platinum)</h3>
+        <h3 style="font-weight: 700; margin-bottom: 16px; color: var(--foreground);"><?= __('Active Deposit Tiers (Gold, Diamond, Platinum)') ?></h3>
         <div style="display: flex; flex-direction: column; gap: 16px;" id="payment-methods-list">
             <!-- Payment Tiers editor dynamically loaded -->
         </div>
@@ -75,13 +75,12 @@ ob_start();
 
             pmData.methods.forEach(m => {
                 const row = document.createElement('form');
-                row.className = 'glass-card';
-                row.style.cssText = 'padding: 16px; display: grid; grid-template-columns: 120px 1fr 1fr 120px; gap: 16px; align-items: center; border: 1px solid var(--border);';
+                row.className = 'glass-card tier-form-grid';
                 row.innerHTML = `
-                    <div style="font-weight: 800; color: var(--foreground);">${m.label} Tier</div>
-                    <input class="form-input" type="text" name="upiId" placeholder="UPI ID" value="${m.upiId || ''}">
+                    <div style="font-weight: 800; color: var(--foreground);">${m.label} <?= __('Tier') ?></div>
+                    <input class="form-input" type="text" name="upiId" placeholder="<?= __('UPI ID') ?>" value="${m.upiId || ''}">
                     <input class="form-input" type="file" name="qrImage" accept="image/*">
-                    <button type="submit" class="btn-primary" style="padding: 8px; color: #000000;">Save Tier</button>
+                    <button type="submit" class="btn-primary" style="padding: 8px; color: #000000;"><?= __('Save Tier') ?></button>
                 `;
                 row.addEventListener('submit', async (e) => {
                     e.preventDefault();
@@ -92,7 +91,7 @@ ob_start();
                             body: formData,
                             isMultipart: true
                         });
-                        Toast.show(`${m.label} tier details saved successfully!`);
+                        Toast.show(`${m.label} <?= __('tier details saved successfully!') ?>`);
                         fetchSettings();
                     } catch (err) {
                         Toast.show(err.message, 'error');
@@ -102,7 +101,7 @@ ob_start();
             });
         } catch (err) {
             console.error('fetchSettings failed:', err);
-            Toast.show(err.message || 'Failed to load settings', 'error');
+            Toast.show(err.message || '<?= __('Failed to load settings') ?>', 'error');
         }
     }
 
@@ -116,7 +115,7 @@ ob_start();
                 body: formData,
                 isMultipart: true
             });
-            Toast.show('QR code image uploaded.');
+            Toast.show('<?= __('QR code image uploaded.') ?>');
             fetchSettings();
         } catch (err) {
             Toast.show(err.message, 'error');
@@ -144,7 +143,7 @@ ob_start();
                 body: { requiredReferrals: parseInt(document.getElementById('settings-req-referrals').value) }
             });
 
-            Toast.show('System settings saved successfully!');
+            Toast.show('<?= __('System settings saved successfully!') ?>');
             fetchSettings();
         } catch (err) {
             Toast.show(err.message, 'error');

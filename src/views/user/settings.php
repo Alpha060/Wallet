@@ -3,88 +3,88 @@
 require_once dirname(dirname(dirname(__DIR__))) . '/src/helpers.php';
 $user = requireAuth();
 
-$title = "AeroPay - Settings";
-$description = "Configure Profile details, KYC data, and password";
+$title = __("AeroPay - Settings");
+$description = __("Configure Profile details, KYC data, and password");
 $activePage = "settings";
 
 ob_start();
 ?>
 
 <div style="display: flex; gap: 16px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
-    <button class="nav-link active" onclick="switchSettingsSubTab('profile')" id="subtab-profile-btn" style="width: auto; padding: 8px 16px;">👤 Profile</button>
-    <button class="nav-link" onclick="switchSettingsSubTab('payment')" id="subtab-payment-btn" style="width: auto; padding: 8px 16px;">💳 Payment Details</button>
+    <button class="nav-link active" onclick="switchSettingsSubTab('profile')" id="subtab-profile-btn" style="width: auto; padding: 8px 16px;">👤 <?= __('Profile') ?></button>
+    <button class="nav-link" onclick="switchSettingsSubTab('payment')" id="subtab-payment-btn" style="width: auto; padding: 8px 16px;">💳 <?= __('Payment Details') ?></button>
 </div>
 
 <!-- Profile Subtab -->
 <div id="settings-profile-panel">
     <form id="profile-form" class="glass-panel" style="padding: 36px; max-width: 600px; border: 1px solid var(--border);">
-        <h3 style="font-weight: 700; margin-bottom: 20px; color: var(--foreground);">Profile Information</h3>
+        <h3 style="font-weight: 700; margin-bottom: 20px; color: var(--foreground);"><?= __('Profile Information') ?></h3>
         
         <div class="form-group">
-            <label class="form-label">Full Name</label>
+            <label class="form-label"><?= __('Full Name') ?></label>
             <input class="form-input" type="text" id="prof-name" name="name">
         </div>
 
         <div class="form-group">
-            <label class="form-label">Mobile Number</label>
+            <label class="form-label"><?= __('Mobile Number') ?></label>
             <input class="form-input" type="text" id="prof-mobile" name="mobileNumber">
         </div>
 
         <div class="form-group">
-            <label class="form-label">Date of Birth</label>
+            <label class="form-label"><?= __('Date of Birth') ?></label>
             <input class="form-input" type="date" id="prof-dob" name="dateOfBirth">
         </div>
 
         <div class="form-group">
-            <label class="form-label">Aadhar Card Number (12 digits)</label>
+            <label class="form-label"><?= __('Aadhar Card Number (12 digits)') ?></label>
             <input class="form-input" type="text" id="prof-aadhar" name="aadharNumber" maxlength="12">
         </div>
 
         <div class="form-group">
-            <label class="form-label">PAN Card Number (10 characters)</label>
+            <label class="form-label"><?= __('PAN Card Number (10 characters)') ?></label>
             <input class="form-input" type="text" id="prof-pan" name="panNumber" maxlength="10" style="text-transform: uppercase;">
         </div>
 
-        <button type="submit" class="btn-primary">Save Profile</button>
+        <button type="submit" class="btn-primary"><?= __('Save Profile') ?></button>
     </form>
 </div>
 
 <!-- Payment Details Subtab -->
 <div id="settings-payment-panel" style="display: none;">
     <form id="payment-details-form" class="glass-panel" style="padding: 36px; max-width: 600px; border: 1px solid var(--border);">
-        <h3 style="font-weight: 700; margin-bottom: 20px; color: var(--foreground);">Withdrawal Details</h3>
+        <h3 style="font-weight: 700; margin-bottom: 20px; color: var(--foreground);"><?= __('Withdrawal Details') ?></h3>
         
         <div class="form-group">
-            <label class="form-label">Preferred Cashout Method</label>
+            <label class="form-label"><?= __('Preferred Cashout Method') ?></label>
             <select class="form-input" id="set-pref-method" name="preferredPaymentMethod">
-                <option value="upi">UPI ID</option>
-                <option value="bank">Bank Transfer</option>
+                <option value="upi"><?= __('UPI ID') ?></option>
+                <option value="bank"><?= __('Bank Transfer') ?></option>
             </select>
         </div>
 
         <div class="form-group">
-            <label class="form-label">Saved UPI ID</label>
+            <label class="form-label"><?= __('Saved UPI ID') ?></label>
             <input class="form-input" type="text" id="set-upi" name="upiId">
         </div>
 
-        <h4 style="font-weight: 700; margin: 24px 0 12px 0; color: var(--foreground);">Saved Bank Details</h4>
+        <h4 style="font-weight: 700; margin: 24px 0 12px 0; color: var(--foreground);"><?= __('Saved Bank Details') ?></h4>
 
         <div class="form-group">
-            <label class="form-label">Account Holder Name</label>
+            <label class="form-label"><?= __('Account Holder Name') ?></label>
             <input class="form-input" type="text" id="set-acc-name">
         </div>
 
         <div class="form-group">
-            <label class="form-label">Account Number</label>
+            <label class="form-label"><?= __('Account Number') ?></label>
             <input class="form-input" type="text" id="set-acc-num">
         </div>
 
         <div class="form-group">
-            <label class="form-label">IFSC Code</label>
+            <label class="form-label"><?= __('IFSC Code') ?></label>
             <input class="form-input" type="text" id="set-ifsc" style="text-transform: uppercase;">
         </div>
 
-        <button type="submit" class="btn-primary">Save Methods</button>
+        <button type="submit" class="btn-primary"><?= __('Save Methods') ?></button>
     </form>
 </div>
 
@@ -136,7 +136,7 @@ ob_start();
                     panNumber: document.getElementById('prof-pan').value
                 }
             });
-            Toast.show('Profile updated successfully!');
+            Toast.show('<?= __('Profile updated successfully!') ?>');
             fetchSettings();
         } catch (err) {
             Toast.show(err.message, 'error');
@@ -158,7 +158,7 @@ ob_start();
                     }
                 }
             });
-            Toast.show('Payment configurations saved!');
+            Toast.show('<?= __('Payment configurations saved!') ?>');
             fetchSettings();
         } catch (err) {
             Toast.show(err.message, 'error');

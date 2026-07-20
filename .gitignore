@@ -1,6 +1,7 @@
 # PHP Application Git Ignore
 .env.local
 /uploads/
+/public/uploads/
 *.log
 .DS_Store
 Thumbs.db

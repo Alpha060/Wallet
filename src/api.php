@@ -596,7 +596,7 @@ try {
                 // Check daily limit (3 buys of same asset per day)
                 $limitStmt = $pdo->prepare('
                     SELECT COUNT(id) FROM user_investments 
-                    WHERE user_id = :userId AND product_id = :productId AND DATE(purchased_at) = CURRENT_DATE()
+                    WHERE user_id = :userId AND product_id = :productId AND CAST(purchased_at AS DATE) = CURRENT_DATE
                 ');
                 $limitStmt->execute(['userId' => $currentUser['id'], 'productId' => $productId]);
                 $todayBuys = (int)$limitStmt->fetchColumn();
@@ -655,7 +655,7 @@ try {
                 // Limit early exit (max 3 sells of same asset per day)
                 $limitStmt = $pdo->prepare('
                     SELECT COUNT(id) FROM user_investments 
-                    WHERE user_id = :userId AND product_id = :productId AND is_sold = TRUE AND DATE(sold_at) = CURRENT_DATE()
+                    WHERE user_id = :userId AND product_id = :productId AND is_sold = TRUE AND CAST(sold_at AS DATE) = CURRENT_DATE
                 ');
                 $limitStmt->execute(['userId' => $currentUser['id'], 'productId' => $inv['product_id']]);
                 $todaySells = (int)$limitStmt->fetchColumn();
@@ -765,7 +765,7 @@ try {
                 if (strtotime($inv['expires_at']) <= time()) throw new Exception('Investment contract has expired');
 
                 // Check double watch today
-                $chkStmt = $pdo->prepare('SELECT id FROM ad_watch_log WHERE user_investment_id = :id AND DATE(watched_at) = CURRENT_DATE()');
+                $chkStmt = $pdo->prepare('SELECT id FROM ad_watch_log WHERE user_investment_id = :id AND CAST(watched_at AS DATE) = CURRENT_DATE');
                 $chkStmt->execute(['id' => $investmentId]);
                 if ($chkStmt->fetch()) {
                     throw new Exception('Already claimed daily reward for this asset today.');
@@ -1287,6 +1287,18 @@ try {
                 jsonResponse(['success' => true, 'productId' => $newProductId]);
             }
 
+            else if ($route === 'products/admin/daily-ad' && $method === 'POST') {
+                $url = trim($input['videoUrl'] ?? '');
+                // Accept any URL from YouTube, Instagram, Facebook, etc.
+                if ($url !== '' && !preg_match('#^https?://#i', $url)) {
+                    jsonError('URL must start with http:// or https://', 400);
+                }
+                $stmt = $pdo->prepare('INSERT INTO daily_ad (video_url, updated_by) VALUES (:url, :adminId)');
+                $stmt->execute(['url' => $url, 'adminId' => $currentAdmin['id']]);
+                recordAdminAudit($currentAdmin['id'], 'global_ad_update', 'daily_ad', null, ['videoUrl' => $url]);
+                jsonResponse(['success' => true]);
+            }
+
             else if (isset($routeParts[0]) && $routeParts[0] === 'products' && isset($routeParts[1]) && $routeParts[1] === 'admin' && isset($routeParts[2])) {
                 $productId = $routeParts[2];
 
@@ -1307,8 +1319,9 @@ try {
                             $ins = $pdo->prepare('INSERT INTO product_ad_links (product_id, day_number, video_url) VALUES (:prodId, :day, :url)');
                             foreach ($links as $lnk) {
                                 $videoUrl = trim($lnk['videoUrl'] ?? '');
-                                if ($videoUrl !== '' && !filter_var($videoUrl, FILTER_VALIDATE_URL)) {
-                                    throw new Exception('Invalid ad URL provided');
+                                // Accept any URL from YouTube, Instagram, Facebook, etc.
+                                if ($videoUrl !== '' && !preg_match('#^https?://#i', $videoUrl)) {
+                                    throw new Exception('URL must start with http:// or https://');
                                 }
                                 $ins->execute([
                                     'prodId' => $productId,
@@ -1364,16 +1377,7 @@ try {
                 }
             }
 
-            else if ($route === 'products/admin/daily-ad' && $method === 'POST') {
-                $url = trim($input['videoUrl'] ?? '');
-                if ($url !== '' && !filter_var($url, FILTER_VALIDATE_URL)) {
-                    jsonError('Invalid global ad URL', 400);
-                }
-                $stmt = $pdo->prepare('INSERT INTO daily_ad (video_url, updated_by) VALUES (:url, :adminId)');
-                $stmt->execute(['url' => $url, 'adminId' => $currentAdmin['id']]);
-                recordAdminAudit($currentAdmin['id'], 'global_ad_update', 'daily_ad', null, ['videoUrl' => $url]);
-                jsonResponse(['success' => true]);
-            }
+            // NOTE: products/admin/daily-ad route moved above products/admin/<id> to avoid route collision
 
             else if ($route === 'admin/upi-id' && $method === 'PUT') {
                 $upi = trim($input['upiId'] ?? '');

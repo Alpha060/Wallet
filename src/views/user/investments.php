@@ -3,8 +3,8 @@
 require_once dirname(dirname(dirname(__DIR__))) . '/src/helpers.php';
 $user = requireAuth();
 
-$title = "AeroPay - My Investments";
-$description = "Manage active yield contracts and watch daily ads to get your returns";
+$title = __("AeroPay - My Investments");
+$description = __("Manage active yield contracts and watch daily ads to get your returns");
 $activePage = "investments";
 
 ob_start();
@@ -15,7 +15,7 @@ ob_start();
 </div>
 
 <div class="glass-panel" style="padding: 24px; border: 1px solid var(--border);">
-    <h3 style="font-weight: 700; margin-bottom: 20px;">Yield Earnings History</h3>
+    <h3 style="font-weight: 700; margin-bottom: 20px;"><?= __('Yield Earnings History') ?></h3>
     <div id="investment-history-list" style="display: flex; flex-direction: column; gap: 12px;">
         <!-- Earnings list dynamically loaded -->
     </div>
@@ -25,17 +25,17 @@ ob_start();
 <div class="theater-mode" id="ad-theater" style="display: none;">
     <div class="video-container">
         <video id="ad-video-element" controls autoplay style="display: none;"></video>
-        <!-- In case it is an embedded YouTube URL or other link, we support iframe as fallback -->
-        <iframe id="ad-iframe-element" style="display: none;" allow="autoplay"></iframe>
+        <!-- Supports YouTube, Vimeo, Instagram, Facebook, Dailymotion, and any embeddable URL -->
+        <iframe id="ad-iframe-element" style="display: none;" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="no-referrer-when-downgrade" frameborder="0"></iframe>
 
         <div class="countdown-overlay">
-            ⏱️ <span id="ad-time-left">120</span>s Remaining
+            ⏱️ <span id="ad-time-left">120</span>s <?= __('Remaining') ?>
         </div>
     </div>
     <div class="claim-button-container" id="ad-claim-box" style="display: none;">
-        <button class="btn-primary" onclick="claimDailyReward()">🎁 Claim Daily Reward</button>
+        <button class="btn-primary" onclick="claimDailyReward()">🎁 <?= __('Claim Daily Reward') ?></button>
     </div>
-    <button class="btn-secondary" onclick="closeAdPlayer()" style="margin-top: 16px; padding: 10px 20px;">Cancel</button>
+    <button class="btn-secondary" onclick="closeAdPlayer()" style="margin-top: 16px; padding: 10px 20px;"><?= __('Cancel') ?></button>
 </div>
 
 <script>
@@ -47,7 +47,92 @@ ob_start();
     let activeInvestmentId = null;
     let activeAdClaimToken = null;
     let adCountdownTimer = null;
-    
+
+    /**
+     * Universal video URL → embeddable URL converter.
+     * Supports: YouTube, Vimeo, Dailymotion, Instagram, Facebook, Twitter/X, and direct video files.
+     * Returns { type: 'iframe' | 'video', url: string }
+     */
+    function getEmbedUrl(url) {
+        try {
+            const u = new URL(url);
+            const host = u.hostname.replace('www.', '').replace('m.', '');
+
+            // ── YouTube ──
+            if (host === 'youtube.com' || host === 'youtu.be' || host === 'youtube-nocookie.com') {
+                let videoId = null;
+
+                if (host === 'youtu.be') {
+                    videoId = u.pathname.slice(1).split('/')[0];
+                } else if (u.pathname.startsWith('/embed/')) {
+                    videoId = u.pathname.split('/embed/')[1]?.split(/[?/]/)[0];
+                } else if (u.pathname.startsWith('/shorts/')) {
+                    videoId = u.pathname.split('/shorts/')[1]?.split(/[?/]/)[0];
+                } else if (u.pathname.startsWith('/live/')) {
+                    videoId = u.pathname.split('/live/')[1]?.split(/[?/]/)[0];
+                } else if (u.searchParams.has('v')) {
+                    videoId = u.searchParams.get('v');
+                }
+
+                if (videoId) {
+                    return { type: 'iframe', url: `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0` };
+                }
+            }
+
+            // ── Vimeo ──
+            if (host === 'vimeo.com' || host === 'player.vimeo.com') {
+                const vimeoId = u.pathname.match(/\/(\d+)/)?.[1];
+                if (vimeoId) {
+                    return { type: 'iframe', url: `https://player.vimeo.com/video/${vimeoId}?autoplay=1` };
+                }
+            }
+
+            // ── Dailymotion ──
+            if (host === 'dailymotion.com' || host === 'dai.ly') {
+                let dmId = null;
+                if (host === 'dai.ly') {
+                    dmId = u.pathname.slice(1);
+                } else {
+                    dmId = u.pathname.match(/\/video\/([a-zA-Z0-9]+)/)?.[1];
+                }
+                if (dmId) {
+                    return { type: 'iframe', url: `https://www.dailymotion.com/embed/video/${dmId}?autoplay=1` };
+                }
+            }
+
+            // ── Instagram Reels / Posts ──
+            if (host === 'instagram.com') {
+                const igMatch = u.pathname.match(/\/(reel|p|tv)\/([A-Za-z0-9_-]+)/);
+                if (igMatch) {
+                    return { type: 'iframe', url: `https://www.instagram.com/${igMatch[1]}/${igMatch[2]}/embed/` };
+                }
+            }
+
+            // ── Facebook Videos ──
+            if (host === 'facebook.com' || host === 'fb.watch') {
+                return { type: 'iframe', url: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&autoplay=true` };
+            }
+
+            // ── Twitter / X ──
+            if (host === 'twitter.com' || host === 'x.com') {
+                // Twitter doesn't support iframe embeds well for video, open in iframe with noembed
+                return { type: 'iframe', url: url };
+            }
+
+            // ── Direct video files (.mp4, .webm, .ogg, .mov) ──
+            const ext = u.pathname.split('.').pop()?.toLowerCase();
+            if (['mp4', 'webm', 'ogg', 'mov', 'm4v', 'avi'].includes(ext)) {
+                return { type: 'video', url: url };
+            }
+
+            // ── Fallback: try iframe for any unknown URL ──
+            return { type: 'iframe', url: url };
+
+        } catch (e) {
+            // If URL parsing fails, try iframe as last resort
+            return { type: 'iframe', url: url };
+        }
+    }
     async function fetchInvestments() {
         try {
             const [data, histData] = await Promise.all([
@@ -58,7 +143,7 @@ ob_start();
             list.innerHTML = '';
 
             if (data.investments.length === 0) {
-                list.innerHTML = '<div class="glass-card" style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted);">You do not have any active investment contracts. Buy yield assets from the Marketplace to get started.</div>';
+                list.innerHTML = '<div class="glass-card" style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted);"><?= __('You do not have any active investment contracts. Buy yield assets from the Marketplace to get started.') ?></div>';
             }
 
             data.investments.forEach(inv => {
@@ -75,19 +160,19 @@ ob_start();
                 card.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                         <h3 style="font-weight: 700;">${inv.name}</h3>
-                        <span class="badge-roi" style="background: var(--primary-glow); color: var(--primary);">${inv.dailyRewardPercent}% ROI</span>
+                        <span class="badge-roi" style="background: var(--primary-glow); color: var(--primary);">${inv.dailyRewardPercent}<?= __('% ROI') ?></span>
                     </div>
                     <img src="${inv.imageUrl}" alt="${inv.name}" style="width: 100%; height: 120px; object-fit: cover; border-radius: var(--radius-sm); margin-bottom: 16px;">
                     
-                    <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 6px;">Daily Yield: <strong style="color: var(--foreground);">${formatRupees(dailyReward)}</strong></p>
-                    <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 12px;">Contract Expiry: <strong>${daysRemaining} Days remaining</strong></p>
+                    <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 6px;"><?= __('Daily Yield:') ?> <strong style="color: var(--foreground);">${formatRupees(dailyReward)}</strong></p>
+                    <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 12px;"><?= __('Contract Expiry:') ?> <strong>${daysRemaining}<?= __(' Days remaining') ?></strong></p>
                     
                     <div style="display: flex; gap: 12px;">
                         ${inv.watchedToday 
-                            ? `<button class="btn-secondary" style="flex: 1; border-color: var(--success); color: var(--success); cursor: default;" disabled>✓ Completed</button>`
-                            : `<button class="btn-primary" onclick="watchAd('${inv.id}', ${dailyReward}, ${inv.adWatchSeconds})" style="flex: 1;">Watch Ad</button>`
+                            ? `<button class="btn-secondary" style="flex: 1; border-color: var(--success); color: var(--success); cursor: default;" disabled>✓ <?= __('Completed') ?></button>`
+                            : `<button class="btn-primary" onclick="watchAd('${inv.id}', ${dailyReward}, ${inv.adWatchSeconds})" style="flex: 1;"><?= __('Watch Ad') ?></button>`
                         }
-                        <button class="btn-destructive" onclick="exitInvestmentEarly('${inv.id}', '${inv.name}', ${inv.purchasePrice})" style="padding: 10px 14px;">Exit</button>
+                        <button class="btn-destructive" onclick="exitInvestmentEarly('${inv.id}', '${inv.name}', ${inv.purchasePrice})" style="padding: 10px 14px;"><?= __('Exit') ?></button>
                     </div>
                 `;
                 list.appendChild(card);
@@ -106,7 +191,7 @@ ob_start();
             combinedLogs.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
 
             if (combinedLogs.length === 0) {
-                logContainer.innerHTML = '<div style="text-align: center; color: var(--muted); font-size: 0.85rem; padding: 12px 0;">No logs found.</div>';
+                logContainer.innerHTML = '<div style="text-align: center; color: var(--muted); font-size: 0.85rem; padding: 12px 0;"><?= __('No logs found.') ?></div>';
             }
 
             combinedLogs.slice(0, 10).forEach(log => {
@@ -115,7 +200,7 @@ ob_start();
                 const isCredit = log.type !== 'buy';
                 const color = isCredit ? 'var(--success)' : 'var(--destructive)';
                 const prefix = isCredit ? '+' : '-';
-                const label = log.type === 'buy' ? `Purchased ${log.name}` : (log.type === 'sell' ? `Early Refund ${log.name}` : `Daily Ad Reward: ${log.name}`);
+                const label = log.type === 'buy' ? `<?= __('Purchased') ?> ${log.name}` : (log.type === 'sell' ? `<?= __('Early Refund') ?> ${log.name}` : `<?= __('Daily Ad Reward:') ?> ${log.name}`);
                 const date = new Date(log.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 
                 row.innerHTML = `
@@ -133,12 +218,12 @@ ob_start();
     }
 
     async function exitInvestmentEarly(id, name, price) {
-        const confirmExit = confirm(`Are you sure you want to terminate "${name}" contract early? Your initial purchase principal of ${formatRupees(price)} will be immediately refunded to your wallet balance.`);
+        const confirmExit = confirm(`<?= __('Are you sure you want to terminate "') ?>${name}<?= __('" contract early? Your initial purchase principal of ') ?>${formatRupees(price)}<?= __(' will be immediately refunded to your wallet balance.') ?>`);
         if (!confirmExit) return;
 
         try {
             await apiRequest(`/api/products/sell/${id}`, { method: 'POST' });
-            Toast.show('Contract exited. Balance refunded.');
+            Toast.show('<?= __('Contract exited. Balance refunded.') ?>');
             fetchInvestments();
         } catch (err) {
             Toast.show(err.message, 'error');
@@ -161,19 +246,15 @@ ob_start();
             claimBox.style.display = 'none';
             theater.style.display = 'flex';
 
-            // Check link type
+            // Convert any video URL to an embeddable format
             const url = data.videoUrl;
-            if (url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo.com')) {
-                // Handle iframe embeds
-                let embedUrl = url;
-                if (url.includes('watch?v=')) {
-                    embedUrl = url.replace('watch?v=', 'embed/');
-                }
-                iframeEl.src = embedUrl;
+            const embedInfo = getEmbedUrl(url);
+
+            if (embedInfo.type === 'iframe') {
+                iframeEl.src = embedInfo.url;
                 iframeEl.style.display = 'block';
             } else {
-                // Handle raw video files
-                videoEl.src = url;
+                videoEl.src = embedInfo.url;
                 videoEl.style.display = 'block';
                 videoEl.play().catch(() => {});
             }
@@ -190,7 +271,7 @@ ob_start();
                 if (timeLeft <= 0) {
                     clearInterval(adCountdownTimer);
                     claimBox.style.display = 'block';
-                    Toast.show('Daily ad watched completely! Click Claim Reward.', 'success');
+                    Toast.show('<?= __('Daily ad watched completely! Click Claim Reward.') ?>', 'success');
                 }
             }, 1000);
 
@@ -266,7 +347,7 @@ ob_start();
             });
             closeAdPlayer();
             startConfettiAnimation();
-            Toast.show('Reward credited to wallet!', 'success');
+            Toast.show('<?= __('Reward credited to wallet!') ?>', 'success');
             fetchInvestments();
         } catch (err) {
             Toast.show(err.message, 'error');

@@ -256,6 +256,22 @@ function formatCurrencyInput(inputElement) {
     });
 }
 
+// Language Toggle Handler
+function initLanguageToggle() {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; lang=`);
+    const lang = parts.length === 2 ? parts.pop().split(';').shift() : 'en';
+
+    document.querySelectorAll('.lang-toggle-btn').forEach(btn => {
+        btn.innerHTML = lang === 'en' ? '<span style="font-size: 0.8rem; font-weight: 800;">🌐 HI</span>' : '<span style="font-size: 0.8rem; font-weight: 800;">🌐 EN</span>';
+        btn.addEventListener('click', () => {
+            const newLang = lang === 'en' ? 'hi' : 'en';
+            document.cookie = `lang=${newLang}; path=/; max-age=31536000; SameSite=Lax`;
+            window.location.reload();
+        });
+    });
+}
+
 // Password Visibility Toggle Handler
 function initPasswordToggles() {
     document.querySelectorAll('.password-toggle').forEach(btn => {
@@ -282,6 +298,7 @@ function initPasswordToggles() {
 document.addEventListener('DOMContentLoaded', () => {
     Toast.init();
     initPasswordToggles();
+    initLanguageToggle();
     
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
